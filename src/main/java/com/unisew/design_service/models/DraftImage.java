@@ -1,5 +1,6 @@
 package com.unisew.design_service.models;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,19 +20,20 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "`result_image`")
+@Table(name = "`draft_image`")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ResultImage {
+public class DraftImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    String image;
+    @Column(name = "`image_url`")
+    String imageUrl;
 
     String name;
 
     @ManyToOne
-    @JoinColumn(name = "`result_id`")
-    DesignResult designResult;
+    @JoinColumn(name = "`draft_id`")
+    DesignDraft designDraft;
 }

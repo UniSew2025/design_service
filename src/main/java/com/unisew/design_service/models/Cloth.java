@@ -1,6 +1,7 @@
 package com.unisew.design_service.models;
 
-import com.unisew.design_service.enums.Status;
+import com.unisew.design_service.enums.ClothCategory;
+import com.unisew.design_service.enums.ClothType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -21,7 +22,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -29,33 +29,57 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "`design_result`")
+@Table(name = "`cloth`")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class DesignResult {
+public class Cloth {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    String description;
-
-    @Column(name = "`design_date`")
-    LocalDate designDate;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "`cloth_type`")
+    ClothType type;
 
     @Enumerated(EnumType.STRING)
-    Status status;
+    @Column(name = "`cloth_category`")
+    ClothCategory category;
+
+    @Column(name = "`logo_image`")
+    String logoImage;
+
+    @Column(name = "`logo_position`")
+    String logoPosition;
+
+    @Column(name = "`logo_width`")
+    int logoWidth;
+
+    @Column(name = "`logo_height`")
+    int logoHeight;
+
+    String color;
+
+    String fabric;
+
+    String note;
 
     @ManyToOne
-    @JoinColumn(name = "`item_id`")
-    DesignRequestItem designRequestItem;
+    @JoinColumn(name = "`request_id`")
+    DesignRequest designRequest;
 
-    @OneToMany(mappedBy = "designResult")
+    @OneToMany(mappedBy = "cloth")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<ResultImage> resultImages;
+    List<SampleImage> sampleImages;
 
-    @OneToMany(mappedBy = "designResult")
+    @ManyToOne
+    @JoinColumn(name = "template_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<ReDesignRequest> reDesignRequests;
+    Cloth template;
+
+    @OneToMany(mappedBy = "cloth")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<DesignDraft> designDrafts;
 }
