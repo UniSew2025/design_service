@@ -2,6 +2,7 @@ package com.unisew.design_service.service;
 
 import com.unisew.design_service.enums.Status;
 import com.unisew.design_service.models.Cloth;
+import com.unisew.design_service.models.DesignDraft;
 import com.unisew.design_service.models.DesignRequest;
 import com.unisew.design_service.models.SampleImage;
 import com.unisew.design_service.repositories.ClothRepo;
@@ -9,6 +10,7 @@ import com.unisew.design_service.repositories.DesignRequestRepo;
 import com.unisew.design_service.repositories.SampleImageRepo;
 import com.unisew.design_service.request.CreateDesignRequest;
 import com.unisew.design_service.request.GetDesignRequestById;
+import com.unisew.design_service.request.PickPackageRequest;
 import com.unisew.design_service.response.ResponseObject;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -135,6 +137,33 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                 ResponseObject.builder()
                         .status("201")
                         .message("Create Design Request successfully")
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> pickPackage(PickPackageRequest request) {
+
+        //add function getPackage after have service
+
+        DesignRequest designRequest = designRequestRepo.findById(request.getDesignRequestId()).orElse(null);
+
+        if (designRequest == null) {
+            return ResponseEntity.ok().body(
+                    ResponseObject.builder()
+                            .status("404")
+                            .message("Can not find Design Request with " + request.getDesignRequestId())
+                            .build()
+            );
+        }
+
+        designRequest.setPackageId(request.getPackageId());
+        designRequestRepo.save(designRequest);
+
+        return ResponseEntity.ok().body(
+                ResponseObject.builder()
+                        .status("200")
+                        .message("Pick package success ")
                         .build()
         );
     }

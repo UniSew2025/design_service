@@ -1,9 +1,11 @@
 package com.unisew.design_service.controller;
 
 import com.unisew.design_service.models.DesignRequest;
+import com.unisew.design_service.request.CreateDesignDraftRequest;
 import com.unisew.design_service.request.CreateDesignRequest;
 import com.unisew.design_service.request.GetDesignRequestById;
 import com.unisew.design_service.response.ResponseObject;
+import com.unisew.design_service.service.DesignDraftService;
 import com.unisew.design_service.service.DesignRequestService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class DesignRequestController {
 
     final DesignRequestService designRequestService;
+    final DesignDraftService designDraftService;
 
     @GetMapping("/list-request")
     public ResponseEntity<ResponseObject> listRequest() {
@@ -32,5 +35,10 @@ public class DesignRequestController {
     @PostMapping("/request")
     public ResponseEntity<ResponseObject> getRequestById(@RequestBody GetDesignRequestById request) {
         return designRequestService.getDesignRequestById(request);
+    }
+
+    @PostMapping("/design-draft")
+    public ResponseEntity<ResponseObject> addDesignDraft(@RequestBody CreateDesignDraftRequest request) {
+        return designDraftService.createDesignDraft(request);
     }
 }
