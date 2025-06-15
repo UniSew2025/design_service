@@ -21,7 +21,7 @@ import lombok.experimental.FieldDefaults;
 @Entity
 @Table(name = "`re_design_request`")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ReDesignRequest {
+public class RevisionRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
