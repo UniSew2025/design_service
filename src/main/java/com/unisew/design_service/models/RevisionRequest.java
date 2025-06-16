@@ -19,7 +19,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "`re_design_request`")
+@Table(name = "`revision_request`")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RevisionRequest {
 

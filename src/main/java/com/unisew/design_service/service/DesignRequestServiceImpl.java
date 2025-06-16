@@ -1,20 +1,14 @@
 package com.unisew.design_service.service;
 
 import com.unisew.design_service.enums.Status;
-import com.unisew.design_service.models.Cloth;
-import com.unisew.design_service.models.DesignDraft;
-import com.unisew.design_service.models.DesignRequest;
-import com.unisew.design_service.models.SampleImage;
-import com.unisew.design_service.repositories.ClothRepo;
-import com.unisew.design_service.repositories.DesignRequestRepo;
-import com.unisew.design_service.repositories.SampleImageRepo;
-import com.unisew.design_service.request.CreateDesignRequest;
-import com.unisew.design_service.request.GetDesignRequestById;
-import com.unisew.design_service.request.PickPackageRequest;
+import com.unisew.design_service.models.*;
+import com.unisew.design_service.repositories.*;
+import com.unisew.design_service.request.*;
 import com.unisew.design_service.response.ResponseObject;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +25,8 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     final DesignRequestRepo designRequestRepo;
     final ClothRepo clothRepo;
     final SampleImageRepo sampleImageRepo;
+    final DesignDraftRepo designDraftRepo;
+    final RevisionRequestRepo revisionRequestRepo;
 
     @Override
     public ResponseEntity<ResponseObject> getAllDesignRequests() {
@@ -48,18 +44,16 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         ).toList();
 
         if (designRequests.isEmpty()) {
-            return ResponseEntity.ok().body(
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
-                            .status("404")
                             .message("Design Request Empty")
                             .build()
             );
         }
 
 
-        return ResponseEntity.ok().body(
+        return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseObject.builder()
-                        .status("200")
                         .message("Get list of Design Requests")
                         .data(designRequests)
                         .build()
@@ -72,9 +66,8 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         DesignRequest designRequest = designRequestRepo.findById(request.getDesignId()).orElse(null);
 
         if (designRequest == null) {
-            return ResponseEntity.ok().body(
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
-                            .status("404")
                             .message("Can not find Design Request with " + request.getDesignId())
                             .build()
             );
@@ -88,9 +81,8 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         map.put("status", designRequest.getStatus());
 
 
-        return ResponseEntity.ok().body(
+        return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseObject.builder()
-                        .status("200")
                         .message("Get Design Request successfully")
                         .data(map)
                         .build()
@@ -110,32 +102,40 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                 .build();
         designRequestRepo.save(designRequest);
 
-        List<Cloth> cloths = request.getClothes().stream()
-                .map(clothRequest -> {
-                    SampleImage sampleImage = sampleImageRepo.findById(clothRequest.getSampleImageId()).orElse(null);
-                    Cloth template = null;
+        for (CreateDesignRequest.Cloth cloth : request.getClothes()) {
+            Cloth newCloth = clothRepo.save(Cloth.builder()
+                    .type(cloth.getType())
+                    .category(cloth.getCategory())
+                    .logoImage(cloth.getLogoImage())
+                    .logoPosition(cloth.getLogoPosition())
+                    .designRequest(designRequest)
+                    .color(cloth.getColor())
+                    .note(cloth.getNote())
+                    .build());
 
-                    if (sampleImage == null) {
-                        template = clothRepo.findById(clothRequest.getTemplateId()).orElse(null);
-                    }
-                    return Cloth.builder()
-                            .template(template)
-                            .designRequest(designRequest)
-                            .type(clothRequest.getType())
-                            .category(clothRequest.getCategory())
-                            .logoImage(clothRequest.getLogoImage())
-                            .logoHeight(clothRequest.getLogoHeight())
-                            .logoWidth(clothRequest.getLogoWidth())
-                            .color(clothRequest.getColor())
-                            .note(clothRequest.getNote())
-                            .build();
-                }).toList();
-        clothRepo.saveAll(cloths);
+            if(request.getDesignType().equals("template")){
+
+                Cloth template = clothRepo.findById(cloth.getTemplateId()).orElse(null);
+                if(template == null){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                            ResponseObject.builder()
+                                    .message("Template Not Found")
+                                    .build()
+                    );
+                }
+                newCloth.setTemplate(template);
+                clothRepo.save(newCloth);
+            }
+
+            if(request.getDesignType().equals("upload")){
+                createSampleImageByCloth(newCloth, cloth.getImages());
+            }
+
+        }
 
 
-        return ResponseEntity.ok().body(
+        return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseObject.builder()
-                        .status("201")
                         .message("Create Design Request successfully")
                         .build()
         );
@@ -149,9 +149,8 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         DesignRequest designRequest = designRequestRepo.findById(request.getDesignRequestId()).orElse(null);
 
         if (designRequest == null) {
-            return ResponseEntity.ok().body(
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
-                            .status("404")
                             .message("Can not find Design Request with " + request.getDesignRequestId())
                             .build()
             );
@@ -160,11 +159,87 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         designRequest.setPackageId(request.getPackageId());
         designRequestRepo.save(designRequest);
 
-        return ResponseEntity.ok().body(
+        return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseObject.builder()
-                        .status("200")
                         .message("Pick package success ")
                         .build()
         );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> makeDesignPublic(MakeDesignPublicRequest request) {
+
+        DesignRequest designRequest = designRequestRepo.findById(request.getDesignRequestId()).orElse(null);
+
+        if (designRequest == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("Can not find Design Request with " + request.getDesignRequestId())
+                            .build()
+            );
+        }
+
+        designRequest.setPrivate(false);
+        designRequestRepo.save(designRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseObject.builder()
+                        .message("Change design to public successfully")
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> createRevisionDesign(CreateRevisionDesignRequest request) {
+
+        List<DesignDraft> designDrafts = designDraftRepo.findAllByCloth_Id(request.getClothId());
+
+        if (designDrafts.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("Cloth does not have any design draft")
+                            .build()
+            );
+        }
+
+        for (DesignDraft designDraft : designDrafts) {
+            if (designDraft.isFinal()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        ResponseObject.builder()
+                                .message("Can not create revision request when one of them is final")
+                                .build()
+                );
+            }
+
+            if (request.getDesignDraftId() == designDraft.getId()) {
+                RevisionRequest revisionRequest = RevisionRequest.builder()
+                        .designDraft(designDraft)
+                        .note(request.getNote())
+                        .build();
+                revisionRequestRepo.save(revisionRequest);
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("Design Draft are not belong to this cloth")
+                            .build()
+            );
+
+
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ResponseObject.builder()
+                        .message("Create Revision Design successfully")
+                        .build()
+        );
+    }
+
+    private void createSampleImageByCloth(Cloth cloth, List<CreateDesignRequest.Image> images) {
+        for (CreateDesignRequest.Image image : images) {
+            sampleImageRepo.save(
+                    SampleImage.builder()
+                            .imageUrl(image.getUrl())
+                            .cloth(cloth)
+                            .build());
+        }
     }
 }

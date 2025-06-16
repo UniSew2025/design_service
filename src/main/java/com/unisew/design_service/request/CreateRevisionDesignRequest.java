@@ -1,14 +1,15 @@
-package com.unisew.design_service.response;
+package com.unisew.design_service.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ResponseObject {
-    String message;
-    Object data;
+public class CreateRevisionDesignRequest {
+    int clothId;
+    int designDraftId;
+    String note;
 }

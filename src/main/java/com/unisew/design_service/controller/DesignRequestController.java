@@ -1,9 +1,7 @@
 package com.unisew.design_service.controller;
 
 import com.unisew.design_service.models.DesignRequest;
-import com.unisew.design_service.request.CreateDesignDraftRequest;
-import com.unisew.design_service.request.CreateDesignRequest;
-import com.unisew.design_service.request.GetDesignRequestById;
+import com.unisew.design_service.request.*;
 import com.unisew.design_service.response.ResponseObject;
 import com.unisew.design_service.service.DesignDraftService;
 import com.unisew.design_service.service.DesignRequestService;
@@ -37,8 +35,23 @@ public class DesignRequestController {
         return designRequestService.getDesignRequestById(request);
     }
 
+    @PostMapping("/package")
+    public ResponseEntity<ResponseObject> pickPackage(@RequestBody PickPackageRequest request) {
+        return designRequestService.pickPackage(request);
+    }
+
+    @PostMapping("/public")
+    public ResponseEntity<ResponseObject> makeDesignPublic(@RequestBody MakeDesignPublicRequest request) {
+        return designRequestService.makeDesignPublic(request);
+    }
+
     @PostMapping("/design-draft")
     public ResponseEntity<ResponseObject> addDesignDraft(@RequestBody CreateDesignDraftRequest request) {
         return designDraftService.createDesignDraft(request);
+    }
+
+    @PostMapping("/final")
+    public  ResponseEntity<ResponseObject> makeDesignDraftFinal(@RequestBody SetDesignDraftFinalRequest request) {
+        return designDraftService.setDesignDraftFinal(request);
     }
 }

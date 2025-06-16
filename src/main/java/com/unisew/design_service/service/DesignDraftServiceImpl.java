@@ -7,10 +7,12 @@ import com.unisew.design_service.repositories.ClothRepo;
 import com.unisew.design_service.repositories.DesignDraftRepo;
 import com.unisew.design_service.repositories.DraftImageRepo;
 import com.unisew.design_service.request.CreateDesignDraftRequest;
+import com.unisew.design_service.request.SetDesignDraftFinalRequest;
 import com.unisew.design_service.response.ResponseObject;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -34,9 +36,8 @@ public class DesignDraftServiceImpl implements DesignDraftService {
 
 
         if (cloth == null) {
-            return ResponseEntity.ok().body(
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
-                            .status("404")
                             .message("Can not find cloth with id " + request.getClothId())
                             .build()
             );
@@ -63,10 +64,32 @@ public class DesignDraftServiceImpl implements DesignDraftService {
         designDraftRepo.save(designDraft);
 
 
-        return ResponseEntity.ok().body(
+        return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseObject.builder()
-                        .status("200")
                         .message("Upload Design draft successful")
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> setDesignDraftFinal(SetDesignDraftFinalRequest request) {
+
+        DesignDraft designDraft = designDraftRepo.findById(request.getDesignDraftId()).orElse(null);
+
+        if (designDraft == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("Can not find design draft with id " + request.getDesignDraftId())
+                            .build()
+            );
+        }
+
+            designDraft.setFinal(true);
+            designDraftRepo.save(designDraft);
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseObject.builder()
+                        .message("Make design draft final successful")
                         .build()
         );
     }
