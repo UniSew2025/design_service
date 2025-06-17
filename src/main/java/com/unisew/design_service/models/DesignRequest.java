@@ -48,10 +48,11 @@ public class DesignRequest {
     Status status;
 
     @Column(name = "`school_id`")
-    int schoolId;
+    Integer schoolId;
 
-    @Column(name = "`designer_id`")
-    int designerId;
+
+    @Column(name = "`package_id`")
+    Integer packageId;
 
     @OneToMany(mappedBy = "designRequest")
     @ToString.Exclude
@@ -59,5 +60,5 @@ public class DesignRequest {
     List<Cloth> cloths;
 
     @Column(name = "`feedback_id`")
-    int feedbackId;
+    Integer feedbackId;
 }
