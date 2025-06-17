@@ -54,4 +54,8 @@ public class DesignRequestController {
     public  ResponseEntity<ResponseObject> makeDesignDraftFinal(@RequestBody SetDesignDraftFinalRequest request) {
         return designDraftService.setDesignDraftFinal(request);
     }
+    @PostMapping("/revision")
+    public ResponseEntity<ResponseObject> createRevisionRequest(@RequestBody CreateRevisionDesignRequest request) {
+        return designRequestService.createRevisionDesign(request);
+    }
 }

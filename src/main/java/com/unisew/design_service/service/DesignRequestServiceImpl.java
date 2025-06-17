@@ -201,14 +201,15 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             );
         }
 
+        if (designDraftRepo.existsByCloth_IdAndIsFinalTrue(request.getClothId())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("Can not create revision request when one of them is final")
+                            .build()
+            );
+        }
+
         for (DesignDraft designDraft : designDrafts) {
-            if (designDraft.isFinal()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                        ResponseObject.builder()
-                                .message("Can not create revision request when one of them is final")
-                                .build()
-                );
-            }
 
             if (request.getDesignDraftId() == designDraft.getId()) {
                 RevisionRequest revisionRequest = RevisionRequest.builder()
@@ -216,19 +217,17 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                         .note(request.getNote())
                         .build();
                 revisionRequestRepo.save(revisionRequest);
+                return ResponseEntity.status(HttpStatus.CREATED).body(
+                        ResponseObject.builder()
+                                .message("Create revision successfully")
+                                .build()
+                );
             }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    ResponseObject.builder()
-                            .message("Design Draft are not belong to this cloth")
-                            .build()
-            );
-
-
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 ResponseObject.builder()
-                        .message("Create Revision Design successfully")
+                        .message("Design Draft are not belong to this cloth")
                         .build()
         );
     }

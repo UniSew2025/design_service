@@ -63,6 +63,8 @@ public class Cloth {
 
     String note;
 
+    String gender;
+
     @ManyToOne
     @JoinColumn(name = "`request_id`")
     DesignRequest designRequest;
