@@ -37,6 +37,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                     response.put("id", request.getId());
                     response.put("school", request.getSchoolId());
                     response.put("private", request.isPrivate());
+                    response.put("package", request.getPackageId());
                     response.put("feedback", request.getFeedbackId());
                     response.put("status", request.getStatus());
                     return response;
