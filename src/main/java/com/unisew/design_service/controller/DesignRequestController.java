@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@RequestMapping("/api/v1/design-request")
+@RequestMapping("/api/v1/design")
 public class DesignRequestController {
 
     final DesignRequestService designRequestService;

@@ -105,6 +105,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         for (CreateDesignRequest.Cloth cloth : request.getClothes()) {
             Cloth newCloth = clothRepo.save(Cloth.builder()
                     .type(cloth.getType())
+                    .gender(cloth.getGender())
                     .category(cloth.getCategory())
                     .logoImage(cloth.getLogoImage())
                     .logoPosition(cloth.getLogoPosition())
@@ -113,10 +114,10 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                     .note(cloth.getNote())
                     .build());
 
-            if(request.getDesignType().equals("template")){
+            if (cloth.getDesignType().equals("TEMPLATE")) {
 
                 Cloth template = clothRepo.findById(cloth.getTemplateId()).orElse(null);
-                if(template == null){
+                if (template == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                             ResponseObject.builder()
                                     .message("Template Not Found")
@@ -127,10 +128,9 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                 clothRepo.save(newCloth);
             }
 
-            if(request.getDesignType().equals("upload")){
+            if (cloth.getDesignType().equals("UPLOAD")) {
                 createSampleImageByCloth(newCloth, cloth.getImages());
             }
-
         }
 
 
