@@ -99,7 +99,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                 .creationDate(LocalDate.now())
                 .schoolId(request.getSchoolId())
                 .isPrivate(true)
-                .status(Status.DRAFT)
+                .status(Status.CREATED)
                 .build();
         designRequestRepo.save(designRequest);
 
