@@ -3,6 +3,7 @@ package com.unisew.design_service.controller;
 import com.unisew.design_service.models.DesignRequest;
 import com.unisew.design_service.request.*;
 import com.unisew.design_service.response.ResponseObject;
+import com.unisew.design_service.service.ClothService;
 import com.unisew.design_service.service.DesignDraftService;
 import com.unisew.design_service.service.DesignRequestService;
 import lombok.AccessLevel;
@@ -14,11 +15,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@RequestMapping("/api/v1/design-request")
+@RequestMapping("/api/v1/design")
 public class DesignRequestController {
 
     final DesignRequestService designRequestService;
     final DesignDraftService designDraftService;
+    final ClothService clothService;
 
     @GetMapping("/list-request")
     public ResponseEntity<ResponseObject> listRequest() {
@@ -53,5 +55,14 @@ public class DesignRequestController {
     @PostMapping("/final")
     public  ResponseEntity<ResponseObject> makeDesignDraftFinal(@RequestBody SetDesignDraftFinalRequest request) {
         return designDraftService.setDesignDraftFinal(request);
+    }
+    @PostMapping("/revision")
+    public ResponseEntity<ResponseObject> createRevisionRequest(@RequestBody CreateRevisionDesignRequest request) {
+        return designRequestService.createRevisionDesign(request);
+    }
+
+    @PostMapping("/cloth-list")
+    public ResponseEntity<ResponseObject> getListClothByRequestId(@RequestBody GetAllClothByRequestId request) {
+        return clothService.getAllClothesByRequestId(request);
     }
 }

@@ -2,12 +2,9 @@ package com.unisew.design_service.request;
 
 import com.unisew.design_service.enums.ClothCategory;
 import com.unisew.design_service.enums.ClothType;
-import com.unisew.design_service.enums.Status;
-import com.unisew.design_service.models.SampleImage;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @AllArgsConstructor
@@ -18,9 +15,6 @@ import java.util.List;
 public class CreateDesignRequest {
     int schoolId;
     List<Cloth> clothes;
-    String designType;
-
-
 
     @AllArgsConstructor
     @NoArgsConstructor
@@ -34,8 +28,10 @@ public class CreateDesignRequest {
         ClothCategory category;
         String logoImage;
         String logoPosition;
+        String gender;
         String color;
         String note;
+        String designType;
     }
 
     @AllArgsConstructor
