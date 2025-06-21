@@ -6,6 +6,7 @@ import com.unisew.design_service.response.ResponseObject;
 import com.unisew.design_service.service.ClothService;
 import com.unisew.design_service.service.DesignDraftService;
 import com.unisew.design_service.service.DesignRequestService;
+import com.unisew.design_service.service.SampleImageService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +22,7 @@ public class DesignRequestController {
     final DesignRequestService designRequestService;
     final DesignDraftService designDraftService;
     final ClothService clothService;
+    final SampleImageService sampleImageService;
 
     @GetMapping("/list-request")
     public ResponseEntity<ResponseObject> listRequest() {
@@ -64,5 +66,9 @@ public class DesignRequestController {
     @PostMapping("/cloth-list")
     public ResponseEntity<ResponseObject> getListClothByRequestId(@RequestBody GetAllClothByRequestId request) {
         return clothService.getAllClothesByRequestId(request);
+    }
+    @GetMapping("/sampleImage-list")
+    public ResponseEntity<ResponseObject> getListSampleImages(){
+        return sampleImageService.getAllSampleImages();
     }
 }

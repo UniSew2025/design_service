@@ -6,4 +6,5 @@ import org.springframework.http.ResponseEntity;
 
 public interface ClothService {
     ResponseEntity<ResponseObject> getAllClothesByRequestId(GetAllClothByRequestId request);
+    ResponseEntity<ResponseObject> getAllClothes();
 }
