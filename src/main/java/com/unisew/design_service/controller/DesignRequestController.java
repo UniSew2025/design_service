@@ -71,4 +71,10 @@ public class DesignRequestController {
     public ResponseEntity<ResponseObject> getListSampleImages(){
         return sampleImageService.getAllSampleImages();
     }
+
+    @GetMapping("/design-request/{id}/comments")
+    public ResponseEntity<ResponseObject> getListComments(@PathVariable int id) {
+        return designRequestService.getAllDesignComments(id);
+    }
+
 }
