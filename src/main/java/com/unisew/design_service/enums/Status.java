@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 public enum Status {
 
     CREATED("created"),
-    DRAFT("draft"),
-    PENDING("pending"),
-    APPROVE("approve");
+    PAID("paid"),
+    DESIGNING("designing"),
+    COMPLETED("completed");
 
     private final String value;
 }

@@ -32,8 +32,8 @@ public class DesignServiceApplication {
             // ======== DESIGN REQUESTS ========
             DesignRequest request1 = DesignRequest.builder()
                     .creationDate(LocalDate.now().minusDays(10))
-                    .isPrivate(false)
-                    .status(Status.CREATED)
+                    .isPrivate(true)
+                    .status(Status.COMPLETED)
                     .schoolId(5)
                     .packageId(0)
                     .feedbackId(0)
@@ -41,8 +41,8 @@ public class DesignServiceApplication {
 
             DesignRequest request2 = DesignRequest.builder()
                     .creationDate(LocalDate.now().minusDays(7))
-                    .isPrivate(false)
-                    .status(Status.PENDING)
+                    .isPrivate(true)
+                    .status(Status.PAID)
                     .schoolId(5)
                     .packageId(0)
                     .feedbackId(0)
