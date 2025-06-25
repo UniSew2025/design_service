@@ -7,10 +7,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Status {
 
-    CREATED("created"),
-    PAID("paid"),
-    DESIGNING("designing"),
-    COMPLETED("completed");
+    CREATED("created"),// vua tao ra
+    UNPAID("unpaid"), // da chon package chua thanh toan
+    PAID("paid"), // da thanh toan package
+    DESIGNING("designing"), // dang duoc thiet ke
+    COMPLETED("completed"); //da hoan thanh
 
     private final String value;
 }
