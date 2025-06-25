@@ -14,6 +14,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,6 +30,8 @@ public class RevisionRequest {
     Integer id;
 
     String note;
+
+    LocalDate createdAt;
 
     @ManyToOne
     @JoinColumn(name = "`draft_id`")

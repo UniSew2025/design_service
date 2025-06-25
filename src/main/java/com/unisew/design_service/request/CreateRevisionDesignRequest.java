@@ -12,4 +12,6 @@ public class CreateRevisionDesignRequest {
     int clothId;
     int designDraftId;
     String note;
+    int senderId;
+    String senderRole;
 }

@@ -13,9 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +26,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     final SampleImageRepo sampleImageRepo;
     final DesignDraftRepo designDraftRepo;
     final RevisionRequestRepo revisionRequestRepo;
+    private final DesignCommentRepo designCommentRepo;
 
     @Override
     public ResponseEntity<ResponseObject> getAllDesignRequests() {
@@ -191,47 +191,79 @@ public class DesignRequestServiceImpl implements DesignRequestService {
 
     @Override
     public ResponseEntity<ResponseObject> createRevisionDesign(CreateRevisionDesignRequest request) {
-
-        List<DesignDraft> designDrafts = designDraftRepo.findAllByCloth_Id(request.getClothId());
-
-        if (designDrafts.isEmpty()) {
+        Optional<DesignDraft> optDraft = designDraftRepo.findByIdAndCloth_Id(request.getDesignDraftId(), request.getClothId());
+        if (optDraft.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
-                            .message("Cloth does not have any design draft")
+                            .message("Design Draft does not belong to this cloth")
                             .build()
             );
         }
+        DesignDraft draft = optDraft.get();
 
         if (designDraftRepo.existsByCloth_IdAndIsFinalTrue(request.getClothId())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
-                            .message("Can not create revision request when one of them is final")
+                            .message("Cannot create revision request when one of them is final")
                             .build()
             );
         }
 
-        for (DesignDraft designDraft : designDrafts) {
+        RevisionRequest revisionRequest = RevisionRequest.builder()
+                .designDraft(draft)
+                .note(request.getNote())
+                .build();
+        revisionRequestRepo.save(revisionRequest);
 
-            if (request.getDesignDraftId() == designDraft.getId()) {
-                RevisionRequest revisionRequest = RevisionRequest.builder()
-                        .designDraft(designDraft)
-                        .note(request.getNote())
-                        .build();
-                revisionRequestRepo.save(revisionRequest);
-                return ResponseEntity.status(HttpStatus.CREATED).body(
-                        ResponseObject.builder()
-                                .message("Create revision successfully")
-                                .build()
-                );
-            }
-        }
+        DesignComment sysComment = DesignComment.builder()
+                .designRequest(optDraft.get().getCloth().getDesignRequest())
+                .senderId(request.getSenderId())
+                .senderRole(request.getSenderRole())
+                .content("School requested a revision: " + request.getNote())
+                .creationDate(LocalDateTime.now())
+                .build();
+        designCommentRepo.save(sysComment);
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseObject.builder()
-                        .message("Design Draft are not belong to this cloth")
+                        .message("Create revision successfully")
                         .build()
         );
     }
+
+    @Override
+    public ResponseEntity<ResponseObject> getAllDesignComments(int designId) {
+
+        List<DesignComment> designComments = designCommentRepo.findAllByDesignRequest_Id(designId);
+
+        if (designComments.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    ResponseObject.builder()
+                            .message("This Conversation are empty please wait designer submit first")
+                            .build()
+            );
+        }
+
+        List<Map<String, Object>> mapList = designComments.stream()
+                .map(
+                        comment ->{
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("senderId", comment.getSenderId());
+                            map.put("senderRole", comment.getSenderRole());
+                            map.put("content", comment.getContent());
+                            map.put("createdAt", comment.getCreationDate());
+                            return map;
+                        }
+                ).toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseObject.builder()
+                        .message("List of Design Comments")
+                        .data(mapList)
+                        .build()
+        );
+    }
+
 
     private void createSampleImageByCloth(Cloth cloth, List<CreateDesignRequest.Image> images) {
         for (CreateDesignRequest.Image image : images) {

@@ -1,9 +1,11 @@
 package com.unisew.design_service.service;
 
 import com.unisew.design_service.models.Cloth;
+import com.unisew.design_service.models.DesignComment;
 import com.unisew.design_service.models.DesignDraft;
 import com.unisew.design_service.models.DraftImage;
 import com.unisew.design_service.repositories.ClothRepo;
+import com.unisew.design_service.repositories.DesignCommentRepo;
 import com.unisew.design_service.repositories.DesignDraftRepo;
 import com.unisew.design_service.repositories.DraftImageRepo;
 import com.unisew.design_service.request.CreateDesignDraftRequest;
@@ -17,8 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class DesignDraftServiceImpl implements DesignDraftService {
     final ClothRepo clothRepo;
     final DesignDraftRepo designDraftRepo;
     final DraftImageRepo draftImageRepo;
+    final DesignCommentRepo designCommentRepo;
 
     @Override
     public ResponseEntity<ResponseObject> createDesignDraft(CreateDesignDraftRequest request) {
@@ -63,6 +66,14 @@ public class DesignDraftServiceImpl implements DesignDraftService {
         designDraft.setDraftImages(draftImages);
         designDraftRepo.save(designDraft);
 
+        DesignComment systemComment = DesignComment.builder()
+                .designRequest(cloth.getDesignRequest())
+                .senderId(0)
+                .senderRole("system")
+                .content("Designer delivered a new design version " )
+                .creationDate(LocalDateTime.now())
+                .build();
+        designCommentRepo.save(systemComment);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseObject.builder()
