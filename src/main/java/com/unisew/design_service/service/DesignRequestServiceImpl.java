@@ -27,6 +27,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     final DesignDraftRepo designDraftRepo;
     final RevisionRequestRepo revisionRequestRepo;
     private final DesignCommentRepo designCommentRepo;
+    private final DraftImageRepo draftImageRepo;
 
     @Override
     public ResponseEntity<ResponseObject> getAllDesignRequests() {
@@ -263,6 +264,80 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                         .build()
         );
     }
+
+    @Override
+    public ResponseEntity<ResponseObject> getListDesignComplete() {
+        List<DesignRequest> completeList = designRequestRepo.findAllByStatus(Status.COMPLETED);
+
+        if (completeList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                    ResponseObject.builder()
+                            .message("No Design Requests found")
+                            .build()
+            );
+        }
+
+        List<Map<String, Object>> mapList = completeList.stream().map(request -> {
+            Map<String, Object> requestMap = new HashMap<>();
+            requestMap.put("id", request.getId());
+            requestMap.put("package", request.getPackageId());
+            requestMap.put("creationDate", request.getCreationDate());
+            requestMap.put("status", request.getStatus());
+            requestMap.put("private", request.isPrivate());
+            requestMap.put("school", request.getSchoolId());
+
+            List<Cloth> cloths = clothRepo.getAllByDesignRequest_Id(request.getId());
+            List<Map<String, Object>> clothMap = cloths.stream().map(cloth -> {
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", cloth.getId());
+                map.put("logoHeight", cloth.getLogoHeight());
+                map.put("logoWidth", cloth.getLogoWidth());
+                map.put("templateId", cloth.getTemplate() != null ? cloth.getTemplate().getId() : 0);
+                map.put("clothCategory", cloth.getCategory().getValue());
+                map.put("clothType", cloth.getType().getValue());
+                map.put("color", cloth.getColor());
+                map.put("logoImage", cloth.getLogoImage());
+                map.put("logo_position", cloth.getLogoPosition());
+                map.put("note", cloth.getNote());
+
+                DesignDraft designDraft = designDraftRepo.findByCloth_IdAndIsFinalTrue(cloth.getId());
+                if (designDraft != null) {
+                    Map<String, Object> draftMap = new HashMap<>();
+                    draftMap.put("id", designDraft.getId());
+                    draftMap.put("description", designDraft.getDescription());
+                    draftMap.put("designDate", designDraft.getDesignDate());
+                    draftMap.put("final", designDraft.isFinal());
+
+                    List<DraftImage> draftImages = draftImageRepo.findAllByDesignDraft_Id(designDraft.getId());
+                    List<Map<String, Object>> imageMap = draftImages.stream().map(image -> {
+                        Map<String, Object> link = new HashMap<>();
+                        link.put("id", image.getId());
+                        link.put("url", image.getImageUrl());
+                        link.put("imageName", image.getName());
+                        return link;
+                    }).toList();
+
+                    draftMap.put("images", imageMap.isEmpty() ? null : imageMap);
+                    map.put("draft", draftMap);
+                } else{
+                    map.put("draft", null);
+                }
+
+                return map;
+            }).toList();
+
+            requestMap.put("cloth", clothMap);
+            return requestMap;
+        }).toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseObject.builder()
+                        .message("List Design Complete")
+                        .data(mapList)
+                        .build()
+        );
+    }
+
 
 
     private void createSampleImageByCloth(Cloth cloth, List<CreateDesignRequest.Image> images) {
