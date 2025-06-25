@@ -40,7 +40,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                     response.put("private", request.isPrivate());
                     response.put("package", request.getPackageId());
                     response.put("feedback", request.getFeedbackId());
-                    response.put("status", request.getStatus());
+                    response.put("status", request.getStatus().getValue());
                     return response;
                 }
         ).toList();
@@ -159,6 +159,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         }
 
         designRequest.setPackageId(request.getPackageId());
+        designRequest.setStatus(Status.UNPAID);
         designRequestRepo.save(designRequest);
 
         return ResponseEntity.status(HttpStatus.OK).body(

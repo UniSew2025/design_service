@@ -35,7 +35,7 @@ public class DesignServiceApplication {
                     .isPrivate(true)
                     .status(Status.COMPLETED)
                     .schoolId(5)
-                    .packageId(0)
+                    .packageId(1)
                     .feedbackId(0)
                     .build();
 
@@ -44,7 +44,7 @@ public class DesignServiceApplication {
                     .isPrivate(true)
                     .status(Status.PAID)
                     .schoolId(5)
-                    .packageId(0)
+                    .packageId(1)
                     .feedbackId(0)
                     .build();
 
