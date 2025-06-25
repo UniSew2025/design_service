@@ -101,7 +101,7 @@ public class DesignServiceApplication {
             DesignDraft draft1 = DesignDraft.builder()
                     .description("White shirt sketch")
                     .designDate(LocalDate.now().minusDays(8))
-                    .isFinal(false)
+                    .isFinal(true)
                     .cloth(boyShirt)
                     .build();
 
