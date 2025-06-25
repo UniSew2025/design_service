@@ -13,5 +13,7 @@ public interface DesignDraftRepo extends JpaRepository<DesignDraft, Integer> {
 
     boolean existsByCloth_IdAndIsFinalTrue(Integer cloth_id);
 
+    DesignDraft findByCloth_IdAndIsFinalTrue(Integer cloth_id);
+
     List<DesignDraft> findAllByCloth_DesignRequest_Id(Integer cloth_design_request_id);
 }

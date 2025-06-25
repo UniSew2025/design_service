@@ -76,5 +76,9 @@ public class DesignRequestController {
     public ResponseEntity<ResponseObject> getListComments(@PathVariable int id) {
         return designRequestService.getAllDesignComments(id);
     }
+    @GetMapping("/complete-list")
+    public ResponseEntity<ResponseObject> getListComplete() {
+        return designRequestService.getListDesignComplete();
+    }
 
 }

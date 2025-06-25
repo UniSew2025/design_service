@@ -12,4 +12,5 @@ public interface DesignRequestService {
     ResponseEntity<ResponseObject> makeDesignPublic(MakeDesignPublicRequest request);
     ResponseEntity<ResponseObject> createRevisionDesign(CreateRevisionDesignRequest request);
     ResponseEntity<ResponseObject> getAllDesignComments(int designId);
+    ResponseEntity<ResponseObject> getListDesignComplete();
 }
