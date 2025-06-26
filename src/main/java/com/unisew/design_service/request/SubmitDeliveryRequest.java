@@ -15,24 +15,6 @@ import java.util.List;
 @Builder
 public class SubmitDeliveryRequest {
     private Integer requestId;
-    private List<DraftItem> drafts;
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    @Builder
-    public static class DraftItem {
-        private Integer clothId;
-        private String descriptions;
-        private List<ImageDto> images;
-
-        @AllArgsConstructor
-        @NoArgsConstructor
-        @Data
-        @Builder
-        public static class ImageDto {
-            private String url;
-            private String name;
-        }
-    }
+    private String fileUrl;
+    private String note;
 }

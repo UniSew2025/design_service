@@ -24,8 +24,8 @@ public class DesignServiceApplication {
     public CommandLineRunner initData(
             DesignRequestRepo designRequestRepo,
             ClothRepo clothRepo,
-            DesignDraftRepo designDraftRepo,
-            DraftImageRepo draftImageRepo,
+            DesignDeliveryRepo designDeliveryRepo,
+            FinalImageRepo finalImageRepo,
             RevisionRequestRepo revisionRequestRepo,
             SampleImageRepo sampleImageRepo,
             DesignCommentRepo designCommentRepo) {
@@ -42,7 +42,7 @@ public class DesignServiceApplication {
 
             DesignRequest request2 = DesignRequest.builder()
                     .creationDate(LocalDate.now().minusDays(7))
-                    .isPrivate(true)
+                    .isPrivate(false)
                     .status(Status.PAID)
                     .schoolId(5)
                     .packageId(1)
@@ -80,7 +80,7 @@ public class DesignServiceApplication {
             Cloth pePants = Cloth.builder()
                     .type(ClothType.PANTS)
                     .category(ClothCategory.PHYSICAL_EDUCATION)
-                    .color("Xám đen")
+                    .color("Dark gray")
                     .fabric("Elastic")
                     .gender("Male")
                     .note("Educate pants for male students")
@@ -101,52 +101,68 @@ public class DesignServiceApplication {
 
             clothRepo.saveAll(List.of(boyShirt, girlSkirt, pePants, peShirt));
 
-            // ======== DESIGN DRAFTS ========
-            DesignDraft draft1 = DesignDraft.builder()
-                    .description("White shirt sketch")
-                    .designDate(LocalDate.now().minusDays(8))
-                    .isFinal(true)
-                    .cloth(peShirt)
+            // ======== DESIGN DELIVERY (each request has a delivery) ========
+            DesignDelivery delivery1 = DesignDelivery.builder()
+                    .designRequest(request1)
+                    .fileUrl("https://cdn.school.com/request1_delivery1.zip")
                     .deliveryNumber(1)
-                    .build();
-
-            DesignDraft draft2 = DesignDraft.builder()
-                    .description("Complete version of women's dress")
-                    .designDate(LocalDate.now().minusDays(5))
+                    .submitDate(LocalDateTime.now().minusDays(8))
                     .isFinal(true)
-                    .cloth(pePants)
+                    .note("Initial delivery for request1")
+                    .build();
+
+            DesignDelivery delivery2 = DesignDelivery.builder()
+                    .designRequest(request2)
+                    .fileUrl("https://cdn.school.com/request2_delivery1.zip")
                     .deliveryNumber(1)
+                    .submitDate(LocalDateTime.now().minusDays(5))
+                    .isFinal(false)
+                    .note("First version for request2")
                     .build();
 
-            designDraftRepo.saveAll(List.of(draft1, draft2));
+            designDeliveryRepo.saveAll(List.of(delivery1, delivery2));
 
-            // ======== DRAFT IMAGES ========
-            DraftImage image1 = DraftImage.builder()
-                    .name("Men's shirt front")
-                    .imageUrl("http://cdn.school.com/draft_boy_shirt_front.png")
-                    .designDraft(draft1)
-                    .build();
-
-            DraftImage image2 = DraftImage.builder()
-                    .name("Complete dress")
-                    .imageUrl("http://cdn.school.com/draft_girl_skirt_final.png")
-                    .designDraft(draft2)
-                    .build();
-
-            draftImageRepo.saveAll(List.of(image1, image2));
-
-            // ======== REVISION REQUESTS ========
+            // ======== REVISION REQUESTS (attached to delivery) ========
             RevisionRequest rev1 = RevisionRequest.builder()
-                    .note("Add front buttons")
-                    .designDraft(draft1)
+                    .note("Please add front buttons to shirt design")
+                    .createdAt(LocalDate.now().minusDays(7))
+                    .delivery(delivery1)
                     .build();
 
             RevisionRequest rev2 = RevisionRequest.builder()
-                    .note("Small Logo")
-                    .designDraft(draft2)
+                    .note("Logo is too small, make it bigger")
+                    .createdAt(LocalDate.now().minusDays(4))
+                    .delivery(delivery2)
                     .build();
 
             revisionRequestRepo.saveAll(List.of(rev1, rev2));
+
+            // ======== FINAL IMAGES (attached to cloth) ========
+            FinalImage image1 = FinalImage.builder()
+                    .name("Men's shirt front")
+                    .imageUrl("https://cdn.school.com/final_boy_shirt_front.png")
+                    .cloth(boyShirt)
+                    .build();
+
+            FinalImage image2 = FinalImage.builder()
+                    .name("Girl skirt final")
+                    .imageUrl("https://cdn.school.com/final_girl_skirt.png")
+                    .cloth(girlSkirt)
+                    .build();
+
+            FinalImage image3 = FinalImage.builder()
+                    .name("PE pants")
+                    .imageUrl("https://cdn.school.com/final_pe_pants.png")
+                    .cloth(pePants)
+                    .build();
+
+            FinalImage image4 = FinalImage.builder()
+                    .name("PE shirt")
+                    .imageUrl("https://cdn.school.com/final_pe_shirt.png")
+                    .cloth(peShirt)
+                    .build();
+
+            finalImageRepo.saveAll(List.of(image1, image2, image3, image4));
 
             // ======== SAMPLE IMAGES ========
             String cloudinarySampleUrl = "https://res.cloudinary.com/di1aqthok/image/upload/v1750703944/onmapboetu92mv4hvxz0.jpg";
@@ -168,9 +184,7 @@ public class DesignServiceApplication {
 
             sampleImageRepo.saveAll(List.of(sample1, sample2, sample3));
 
-
-            // ======== Comment ========
-
+            // ======== COMMENTS ========
             DesignComment comment1 = DesignComment.builder()
                     .designRequest(request2)
                     .senderId(1)
@@ -183,7 +197,7 @@ public class DesignServiceApplication {
                     .designRequest(request2)
                     .senderId(0)
                     .creationDate(LocalDateTime.now())
-                    .content("Designer submit 1 delivery")
+                    .content("Designer submitted delivery 1")
                     .senderRole("System")
                     .build();
 
@@ -191,12 +205,13 @@ public class DesignServiceApplication {
                     .designRequest(request2)
                     .senderId(5)
                     .creationDate(LocalDateTime.now())
-                    .content("This is a second comment")
+                    .content("Second comment from school")
                     .senderRole("School")
                     .build();
 
             designCommentRepo.saveAll(List.of(comment1, comment2, comment3));
         };
     }
+
 
 }

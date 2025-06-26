@@ -83,5 +83,5 @@ public class Cloth {
     @OneToMany(mappedBy = "cloth")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<DesignDraft> designDrafts;
+    List<FinalImage> finalImages;
 }

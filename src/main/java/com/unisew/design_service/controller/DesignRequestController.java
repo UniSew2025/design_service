@@ -1,10 +1,9 @@
 package com.unisew.design_service.controller;
 
-import com.unisew.design_service.models.DesignRequest;
 import com.unisew.design_service.request.*;
 import com.unisew.design_service.response.ResponseObject;
 import com.unisew.design_service.service.ClothService;
-import com.unisew.design_service.service.DesignDraftService;
+import com.unisew.design_service.service.DesignDeliveryService;
 import com.unisew.design_service.service.DesignRequestService;
 import com.unisew.design_service.service.SampleImageService;
 import lombok.AccessLevel;
@@ -21,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class DesignRequestController {
 
     final DesignRequestService designRequestService;
-    final DesignDraftService designDraftService;
+    final DesignDeliveryService designDeliveryService;
     final ClothService clothService;
     final SampleImageService sampleImageService;
 
@@ -55,17 +54,6 @@ public class DesignRequestController {
         return designRequestService.makeDesignPublic(request);
     }
 
-    @PostMapping("/design-draft")
-    @PreAuthorize("hasRole('SCHOOL')")
-    public ResponseEntity<ResponseObject> addDesignDraft(@RequestBody CreateDesignDraftRequest request) {
-        return designDraftService.createDesignDraft(request);
-    }
-
-    @PostMapping("/final")
-    @PreAuthorize("hasRole('DESIGNER')")
-    public  ResponseEntity<ResponseObject> makeDesignDraftFinal(@RequestBody SetDesignDraftFinalRequest request) {
-        return designDraftService.setDesignDraftFinal(request);
-    }
     @PostMapping("/revision")
     @PreAuthorize("hasRole('SCHOOL')")
     public ResponseEntity<ResponseObject> createRevisionRequest(@RequestBody CreateRevisionDesignRequest request) {
@@ -89,15 +77,14 @@ public class DesignRequestController {
         return designRequestService.getAllDesignComments(id);
     }
     @GetMapping("/complete-list")
-    @PreAuthorize("hasRole('SCHOOL') or hasRole('DESIGNER')")
+    @PreAuthorize("hasRole('SCHOOL')")
     public ResponseEntity<ResponseObject> getListComplete() {
         return designRequestService.getListDesignComplete();
     }
 
     @PostMapping("/deliveries")
-    @PreAuthorize("hasRole('DESIGNER')")
     public ResponseEntity<ResponseObject> submitDelivery(@RequestBody SubmitDeliveryRequest request) {
-        return designDraftService.submitDelivery(request);
+        return designDeliveryService.submitDelivery(request);
     }
 
 }
