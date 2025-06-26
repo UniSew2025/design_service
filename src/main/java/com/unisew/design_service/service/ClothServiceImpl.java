@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,20 @@ public class ClothServiceImpl implements ClothService {
             map.put("logo_image", cloth.getLogoImage());
             map.put("logo_position", cloth.getLogoPosition());
             map.put("note", cloth.getNote());
+
+            List<SampleImage> sampleImages = sampleImageRepo.findAllByCloth_Id(cloth.getId());
+
+            List<Map<String,Object>> mapImages = sampleImages.stream()
+                    .map(
+                            sampleImage -> {
+                                Map<String, Object> image = new HashMap<>();
+                                image.put("id", sampleImage.getId());
+                                image.put("url", sampleImage.getImageUrl());
+                                return image;
+                            }
+                    ).toList();
+            map.put("images", mapImages);
+
             return map;
         }).toList();
 

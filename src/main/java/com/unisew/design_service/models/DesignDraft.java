@@ -42,6 +42,8 @@ public class DesignDraft {
     @Column(name = "`final`")
     boolean isFinal;
 
+    @Column(name = "`delivery_number`")
+    Integer deliveryNumber;
     @ManyToOne
     @JoinColumn(name = "`cloth_id`")
     Cloth cloth;

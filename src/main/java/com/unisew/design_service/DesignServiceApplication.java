@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @SpringBootApplication
@@ -26,8 +27,8 @@ public class DesignServiceApplication {
             DesignDraftRepo designDraftRepo,
             DraftImageRepo draftImageRepo,
             RevisionRequestRepo revisionRequestRepo,
-            SampleImageRepo sampleImageRepo
-    ) {
+            SampleImageRepo sampleImageRepo,
+            DesignCommentRepo designCommentRepo) {
         return args -> {
             // ======== DESIGN REQUESTS ========
             DesignRequest request1 = DesignRequest.builder()
@@ -58,6 +59,7 @@ public class DesignServiceApplication {
                     .fabric("Cotton")
                     .gender("Male")
                     .note("Short sleeve white shirt for boys")
+                    .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
                     .designRequest(request1)
                     .build();
 
@@ -68,7 +70,7 @@ public class DesignServiceApplication {
                     .fabric("Polyester")
                     .gender("Female")
                     .note("Elementary school uniform skirts for girls")
-                    .logoImage("logo_primary_girl.png")
+                    .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
                     .logoPosition("Front belt")
                     .logoWidth(60)
                     .logoHeight(50)
@@ -82,6 +84,7 @@ public class DesignServiceApplication {
                     .fabric("Elastic")
                     .gender("Male")
                     .note("Educate pants for male students")
+                    .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
                     .designRequest(request2)
                     .build();
 
@@ -91,6 +94,7 @@ public class DesignServiceApplication {
                     .color("White with blue")
                     .fabric("Polyester Elastic")
                     .gender("Female")
+                    .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
                     .note("Gym shirt for female students")
                     .designRequest(request2)
                     .build();
@@ -102,14 +106,16 @@ public class DesignServiceApplication {
                     .description("White shirt sketch")
                     .designDate(LocalDate.now().minusDays(8))
                     .isFinal(true)
-                    .cloth(boyShirt)
+                    .cloth(peShirt)
+                    .deliveryNumber(1)
                     .build();
 
             DesignDraft draft2 = DesignDraft.builder()
                     .description("Complete version of women's dress")
                     .designDate(LocalDate.now().minusDays(5))
                     .isFinal(true)
-                    .cloth(girlSkirt)
+                    .cloth(pePants)
+                    .deliveryNumber(1)
                     .build();
 
             designDraftRepo.saveAll(List.of(draft1, draft2));
@@ -161,6 +167,35 @@ public class DesignServiceApplication {
                     .build();
 
             sampleImageRepo.saveAll(List.of(sample1, sample2, sample3));
+
+
+            // ======== Comment ========
+
+            DesignComment comment1 = DesignComment.builder()
+                    .designRequest(request2)
+                    .senderId(1)
+                    .creationDate(LocalDateTime.now())
+                    .content("This is a first comment")
+                    .senderRole("Designer")
+                    .build();
+
+            DesignComment comment2 = DesignComment.builder()
+                    .designRequest(request2)
+                    .senderId(0)
+                    .creationDate(LocalDateTime.now())
+                    .content("Designer submit 1 delivery")
+                    .senderRole("System")
+                    .build();
+
+            DesignComment comment3 = DesignComment.builder()
+                    .designRequest(request2)
+                    .senderId(5)
+                    .creationDate(LocalDateTime.now())
+                    .content("This is a second comment")
+                    .senderRole("School")
+                    .build();
+
+            designCommentRepo.saveAll(List.of(comment1, comment2, comment3));
         };
     }
 
