@@ -11,6 +11,9 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -156,7 +159,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             );
         }
 
-        if(designRequest.getPackageId() != null) {
+        if (designRequest.getPackageId() != null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
                             .message("This request already have package. Can not pick again!")
@@ -250,7 +253,6 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     }
 
 
-
     @Override
     public ResponseEntity<ResponseObject> getAllDesignComments(int designId) {
 
@@ -266,7 +268,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
 
         List<Map<String, Object>> mapList = designComments.stream()
                 .map(
-                        comment ->{
+                        comment -> {
                             Map<String, Object> map = new HashMap<>();
                             map.put("senderId", comment.getSenderId());
                             map.put("senderRole", comment.getSenderRole());
@@ -286,10 +288,20 @@ public class DesignRequestServiceImpl implements DesignRequestService {
 
     @Override
     public ResponseEntity<ResponseObject> getListDesignComplete() {
-        List<DesignRequest> completeList = designRequestRepo.findAllByStatus(Status.COMPLETED);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Integer accountId = null;
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            accountId = Integer.valueOf(userDetails.getUsername());
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ResponseObject.builder().message("Unauthorized").build());
+        }
+
+        List<DesignRequest> completeList = designRequestRepo.findAllByStatusAndSchoolId(Status.COMPLETED, accountId);
 
         if (completeList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject.builder()
                             .message("No Design Requests found")
                             .build()
@@ -305,6 +317,14 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             requestMap.put("private", request.isPrivate());
             requestMap.put("school", request.getSchoolId());
 
+            DesignDelivery delivery = designDeliveryRepo.findByDesignRequest_IdAndIsFinalTrue(request.getId());
+            Map<String, Object> deliveryMap = new HashMap<>();
+            if (delivery != null) {
+                deliveryMap.put("id", delivery.getId());
+                deliveryMap.put("fileUrl", delivery.getFileUrl());
+            }
+            requestMap.put("delivery", deliveryMap.isEmpty() ? null : deliveryMap);
+
             List<Cloth> cloths = clothRepo.getAllByDesignRequest_Id(request.getId());
             List<Map<String, Object>> clothMap = cloths.stream().map(cloth -> {
                 Map<String, Object> map = new HashMap<>();
@@ -319,17 +339,22 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                 map.put("logo_position", cloth.getLogoPosition());
                 map.put("note", cloth.getNote());
 
-                List<FinalImage> finalImages = finalImageRepo.findAllByCloth_Id(cloth.getId());
-                List<Map<String, Object>> imageMap = finalImages.stream().map(image -> {
-                    Map<String, Object> link = new HashMap<>();
-                    link.put("id", image.getId());
-                    link.put("url", image.getImageUrl());
-                    link.put("imageName", image.getName());
-                    return link;
-                }).toList();
+                List<FinalImage> finalImages = cloth.getFinalImages();
 
-                map.put("finalImages", imageMap.isEmpty() ? null : imageMap);
+                if (finalImages != null && !finalImages.isEmpty()) {
+                    List<Map<String, Object>> imageMap = finalImages.stream().map(
+                            finalImage -> {
+                                Map<String, Object> image = new HashMap<>();
+                                image.put("id", finalImage.getId());
+                                image.put("imageUrl", finalImage.getImageUrl());
+                                return image;
+                            }
+                    ).toList();
 
+                    map.put("finalImages", imageMap);
+                } else {
+                    map.put("finalImages", null);
+                }
                 return map;
             }).toList();
 
@@ -344,8 +369,6 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                         .build()
         );
     }
-
-
 
 
     private void createSampleImageByCloth(Cloth cloth, List<CreateDesignRequest.Image> images) {

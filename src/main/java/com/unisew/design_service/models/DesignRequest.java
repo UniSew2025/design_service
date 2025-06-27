@@ -49,7 +49,7 @@ public class DesignRequest {
     @EqualsAndHashCode.Exclude
     List<DesignComment> comments;
 
-    // QUAN TRỌNG: Chỉ ở đây mới có deliveries!
+
     @OneToMany(mappedBy = "designRequest")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
