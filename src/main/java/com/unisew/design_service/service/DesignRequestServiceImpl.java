@@ -300,6 +300,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                 map.put("logoImage", cloth.getLogoImage());
                 map.put("logo_position", cloth.getLogoPosition());
                 map.put("note", cloth.getNote());
+                map.put("gender", cloth.getGender().toLowerCase());
 
                 DesignDraft designDraft = designDraftRepo.findByCloth_IdAndIsFinalTrue(cloth.getId());
                 if (designDraft != null) {
