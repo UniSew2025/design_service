@@ -7,7 +7,7 @@ import com.unisew.design_service.models.*;
 import com.unisew.design_service.repositories.*;
 import com.unisew.design_service.request.*;
 import com.unisew.design_service.response.ResponseObject;
-import com.unisew.design_service.utils.GetCurrentLoginUser;
+import com.unisew.design_service.utils.AccessCurrentLoginUser;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -204,8 +204,8 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     @Override
     public ResponseEntity<ResponseObject> createRevisionDesign(CreateRevisionDesignRequest request) {
 
-        Integer senderId = GetCurrentLoginUser.getId();
-        String senderRole = GetCurrentLoginUser.getRole();
+        Integer senderId = AccessCurrentLoginUser.getId();
+        String senderRole = AccessCurrentLoginUser.getRole();
 
 
         Optional<DesignDelivery> optDelivery = designDeliveryRepo.findById(request.getDeliveryId());
@@ -296,9 +296,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     @Override
     public ResponseEntity<ResponseObject> getListDesignComplete() {
 
-        Integer accountId = GetCurrentLoginUser.getId();
-        String role = GetCurrentLoginUser.getRole();
-
+        Integer accountId = AccessCurrentLoginUser.getId();
 
         if (accountId == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
