@@ -9,9 +9,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CreateRevisionDesignRequest {
-    int clothId;
-    int designDraftId;
-    String note;
-    int senderId;
-    String senderRole;
+    private Integer deliveryId;
+    private String note;
+    private Integer senderId;
+    private String senderRole;
 }

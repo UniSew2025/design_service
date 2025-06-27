@@ -15,14 +15,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 @Entity
-@Table(name = "`draft_image`")
+@Table(name = "`final_image`")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class DraftImage {
+public class FinalImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,6 +34,7 @@ public class DraftImage {
     String name;
 
     @ManyToOne
-    @JoinColumn(name = "`draft_id`")
-    DesignDraft designDraft;
+    @JoinColumn(name = "`cloth_id`")
+    Cloth cloth;
 }
+

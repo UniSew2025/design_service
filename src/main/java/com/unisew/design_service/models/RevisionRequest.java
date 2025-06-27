@@ -34,6 +34,6 @@ public class RevisionRequest {
     LocalDate createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "`draft_id`")
-    DesignDraft designDraft;
+    @JoinColumn(name = "`delivery_id`")
+    DesignDelivery delivery;
 }
