@@ -1,19 +1,19 @@
 package com.unisew.design_service.service;
 
+import com.unisew.design_service.enums.Fabric;
+import com.unisew.design_service.enums.Gender;
 import com.unisew.design_service.enums.Status;
 import com.unisew.design_service.models.*;
 import com.unisew.design_service.repositories.*;
 import com.unisew.design_service.request.*;
 import com.unisew.design_service.response.ResponseObject;
+import com.unisew.design_service.utils.GetCurrentLoginUser;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -110,10 +110,11 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         for (CreateDesignRequest.Cloth cloth : request.getClothes()) {
             Cloth newCloth = clothRepo.save(Cloth.builder()
                     .type(cloth.getType())
-                    .gender(cloth.getGender())
+                    .gender(Gender.valueOf(cloth.getGender()))
                     .category(cloth.getCategory())
                     .logoImage(cloth.getLogoImage())
                     .logoPosition(cloth.getLogoPosition())
+                    .fabric(Fabric.valueOf(cloth.getFabric()))
                     .designRequest(designRequest)
                     .color(cloth.getColor())
                     .note(cloth.getNote())
@@ -202,6 +203,11 @@ public class DesignRequestServiceImpl implements DesignRequestService {
 
     @Override
     public ResponseEntity<ResponseObject> createRevisionDesign(CreateRevisionDesignRequest request) {
+
+        Integer senderId = GetCurrentLoginUser.getId();
+        String senderRole = GetCurrentLoginUser.getRole();
+
+
         Optional<DesignDelivery> optDelivery = designDeliveryRepo.findById(request.getDeliveryId());
         if (optDelivery.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
@@ -212,7 +218,8 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         }
         DesignDelivery delivery = optDelivery.get();
 
-        if (delivery.getIsFinal() != null && delivery.getIsFinal()) {
+        if (Boolean.TRUE
+                .equals(delivery.getIsFinal())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
                             .message("Cannot create revision: Delivery has been finalized.")
@@ -238,8 +245,8 @@ public class DesignRequestServiceImpl implements DesignRequestService {
 
         DesignComment sysComment = DesignComment.builder()
                 .designRequest(delivery.getDesignRequest())
-                .senderId(request.getSenderId())
-                .senderRole(request.getSenderRole())
+                .senderId(0)
+                .senderRole("system")
                 .content("School requested a revision: " + request.getNote())
                 .creationDate(LocalDateTime.now())
                 .build();
@@ -289,13 +296,16 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     @Override
     public ResponseEntity<ResponseObject> getListDesignComplete() {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Integer accountId = null;
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            accountId = Integer.valueOf(userDetails.getUsername());
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ResponseObject.builder().message("Unauthorized").build());
+        Integer accountId = GetCurrentLoginUser.getId();
+        String role = GetCurrentLoginUser.getRole();
+
+
+        if (accountId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("Invalid header")
+                            .build()
+            );
         }
 
         List<DesignRequest> completeList = designRequestRepo.findAllByStatusAndSchoolId(Status.COMPLETED, accountId);
@@ -311,32 +321,23 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         List<Map<String, Object>> mapList = completeList.stream().map(request -> {
             Map<String, Object> requestMap = new HashMap<>();
             requestMap.put("id", request.getId());
-            requestMap.put("package", request.getPackageId());
             requestMap.put("creationDate", request.getCreationDate());
             requestMap.put("status", request.getStatus());
-            requestMap.put("private", request.isPrivate());
             requestMap.put("school", request.getSchoolId());
 
             DesignDelivery delivery = designDeliveryRepo.findByDesignRequest_IdAndIsFinalTrue(request.getId());
-            Map<String, Object> deliveryMap = new HashMap<>();
-            if (delivery != null) {
-                deliveryMap.put("id", delivery.getId());
-                deliveryMap.put("fileUrl", delivery.getFileUrl());
-            }
-            requestMap.put("delivery", deliveryMap.isEmpty() ? null : deliveryMap);
+
+            requestMap.put("deliveryUrl", delivery == null ? null : delivery.getFileUrl());
 
             List<Cloth> cloths = clothRepo.getAllByDesignRequest_Id(request.getId());
             List<Map<String, Object>> clothMap = cloths.stream().map(cloth -> {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", cloth.getId());
-                map.put("logoHeight", cloth.getLogoHeight());
-                map.put("logoWidth", cloth.getLogoWidth());
-                map.put("templateId", cloth.getTemplate() != null ? cloth.getTemplate().getId() : 0);
+                map.put("gender", cloth.getGender().getValue());
                 map.put("clothCategory", cloth.getCategory().getValue());
                 map.put("clothType", cloth.getType().getValue());
                 map.put("color", cloth.getColor());
                 map.put("logoImage", cloth.getLogoImage());
-                map.put("logo_position", cloth.getLogoPosition());
                 map.put("note", cloth.getNote());
 
                 List<FinalImage> finalImages = cloth.getFinalImages();
@@ -345,8 +346,8 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                     List<Map<String, Object>> imageMap = finalImages.stream().map(
                             finalImage -> {
                                 Map<String, Object> image = new HashMap<>();
-                                image.put("id", finalImage.getId());
-                                image.put("imageUrl", finalImage.getImageUrl());
+                                image.put("name", finalImage.getName());
+                                image.put("url", finalImage.getImageUrl());
                                 return image;
                             }
                     ).toList();

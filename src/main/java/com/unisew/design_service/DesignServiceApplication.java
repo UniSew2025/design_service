@@ -2,6 +2,7 @@ package com.unisew.design_service;
 
 import com.unisew.design_service.enums.ClothCategory;
 import com.unisew.design_service.enums.ClothType;
+import com.unisew.design_service.enums.Fabric;
 import com.unisew.design_service.enums.Gender;
 import com.unisew.design_service.enums.Status;
 import com.unisew.design_service.models.*;
@@ -57,7 +58,7 @@ public class DesignServiceApplication {
                     .type(ClothType.PANTS)
                     .category(ClothCategory.REGULAR)
                     .color("BLack")
-                    .fabric("Cotton")
+                    .fabric(Fabric.COTTON)
                     .gender(Gender.BOY)
                     .note("Short sleeve white shirt for boys")
                     .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
@@ -68,7 +69,7 @@ public class DesignServiceApplication {
                     .type(ClothType.SHIRT)
                     .category(ClothCategory.REGULAR)
                     .color("White")
-                    .fabric("Polyester")
+                    .fabric(Fabric.POLYESTER)
                     .gender(Gender.BOY)
                     .note("Elementary school uniform skirts for girls")
                     .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
@@ -82,7 +83,7 @@ public class DesignServiceApplication {
                     .type(ClothType.PANTS)
                     .category(ClothCategory.PHYSICAL_EDUCATION)
                     .color("Dark gray")
-                    .fabric("Elastic")
+                    .fabric(Fabric.SILK)
                     .gender(Gender.BOY)
                     .note("Educate pants for male students")
                     .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
@@ -93,7 +94,7 @@ public class DesignServiceApplication {
                     .type(ClothType.SHIRT)
                     .category(ClothCategory.PHYSICAL_EDUCATION)
                     .color("White with blue")
-                    .fabric("Polyester Elastic")
+                    .fabric(Fabric.DENIM)
                     .gender(Gender.BOY)
                     .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
                     .note("Gym shirt for female students")

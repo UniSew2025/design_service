@@ -29,10 +29,11 @@ public class CreateDesignRequest {
         ClothCategory category;
         String logoImage;
         String logoPosition;
-        Gender gender;
+        String gender;
         String color;
         String note;
         String designType;
+        String fabric;
     }
 
     @AllArgsConstructor

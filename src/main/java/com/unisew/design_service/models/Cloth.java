@@ -2,6 +2,7 @@ package com.unisew.design_service.models;
 
 import com.unisew.design_service.enums.ClothCategory;
 import com.unisew.design_service.enums.ClothType;
+import com.unisew.design_service.enums.Fabric;
 import com.unisew.design_service.enums.Gender;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -60,10 +61,12 @@ public class Cloth {
 
     String color;
 
-    String fabric;
+    @Enumerated(EnumType.STRING)
+    Fabric fabric;
 
     String note;
 
+    @Enumerated(EnumType.STRING)
     Gender gender;
 
     @ManyToOne
