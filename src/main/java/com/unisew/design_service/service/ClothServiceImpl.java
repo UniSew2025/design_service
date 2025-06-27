@@ -33,7 +33,7 @@ public class ClothServiceImpl implements ClothService {
         List<Cloth> clothList = clothRepo.getAllByDesignRequest_Id(request.getRequestId());
 
         if (clothList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject.builder()
                             .message("no cloth found")
                             .build()
@@ -84,7 +84,7 @@ public class ClothServiceImpl implements ClothService {
         List<Cloth> cloths = clothRepo.findAll();
 
         if (cloths.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject.builder()
                             .message("no cloth found")
                             .build()

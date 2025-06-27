@@ -1,6 +1,5 @@
 package com.unisew.design_service.request;
 
-import com.unisew.design_service.models.DraftImage;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

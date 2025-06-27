@@ -32,7 +32,7 @@ public class SampleImageServiceImpl implements SampleImageService {
 
 
         if (sampleImages.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject.builder()
                             .message("Sample images not found")
                             .build()

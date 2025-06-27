@@ -1,10 +1,13 @@
 package com.unisew.design_service.service;
 
+import com.unisew.design_service.enums.Fabric;
+import com.unisew.design_service.enums.Gender;
 import com.unisew.design_service.enums.Status;
 import com.unisew.design_service.models.*;
 import com.unisew.design_service.repositories.*;
 import com.unisew.design_service.request.*;
 import com.unisew.design_service.response.ResponseObject;
+import com.unisew.design_service.utils.GetCurrentLoginUser;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,10 +27,10 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     final DesignRequestRepo designRequestRepo;
     final ClothRepo clothRepo;
     final SampleImageRepo sampleImageRepo;
-    final DesignDraftRepo designDraftRepo;
+    final DesignDeliveryRepo designDeliveryRepo;
     final RevisionRequestRepo revisionRequestRepo;
     private final DesignCommentRepo designCommentRepo;
-    private final DraftImageRepo draftImageRepo;
+    private final FinalImageRepo finalImageRepo;
 
     @Override
     public ResponseEntity<ResponseObject> getAllDesignRequests() {
@@ -107,10 +110,11 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         for (CreateDesignRequest.Cloth cloth : request.getClothes()) {
             Cloth newCloth = clothRepo.save(Cloth.builder()
                     .type(cloth.getType())
-                    .gender(cloth.getGender())
+                    .gender(Gender.valueOf(cloth.getGender()))
                     .category(cloth.getCategory())
                     .logoImage(cloth.getLogoImage())
                     .logoPosition(cloth.getLogoPosition())
+                    .fabric(Fabric.valueOf(cloth.getFabric()))
                     .designRequest(designRequest)
                     .color(cloth.getColor())
                     .note(cloth.getNote())
@@ -146,14 +150,20 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     @Override
     public ResponseEntity<ResponseObject> pickPackage(PickPackageRequest request) {
 
-        //add function getPackage after have service
-
         DesignRequest designRequest = designRequestRepo.findById(request.getDesignRequestId()).orElse(null);
 
         if (designRequest == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
                             .message("Can not find Design Request with " + request.getDesignRequestId())
+                            .build()
+            );
+        }
+
+        if (designRequest.getPackageId() != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("This request already have package. Can not pick again!")
                             .build()
             );
         }
@@ -193,34 +203,50 @@ public class DesignRequestServiceImpl implements DesignRequestService {
 
     @Override
     public ResponseEntity<ResponseObject> createRevisionDesign(CreateRevisionDesignRequest request) {
-        Optional<DesignDraft> optDraft = designDraftRepo.findByIdAndCloth_Id(request.getDesignDraftId(), request.getClothId());
-        if (optDraft.isEmpty()) {
+
+        Integer senderId = GetCurrentLoginUser.getId();
+        String senderRole = GetCurrentLoginUser.getRole();
+
+
+        Optional<DesignDelivery> optDelivery = designDeliveryRepo.findById(request.getDeliveryId());
+        if (optDelivery.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
-                            .message("Design Draft does not belong to this cloth")
+                            .message("DesignDelivery not found")
                             .build()
             );
         }
-        DesignDraft draft = optDraft.get();
+        DesignDelivery delivery = optDelivery.get();
 
-        if (designDraftRepo.existsByCloth_IdAndIsFinalTrue(request.getClothId())) {
+        if (Boolean.TRUE
+                .equals(delivery.getIsFinal())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
-                            .message("Cannot create revision request when one of them is final")
+                            .message("Cannot create revision: Delivery has been finalized.")
+                            .build()
+            );
+        }
+
+        boolean existsRevision = revisionRequestRepo.existsByDelivery_Id(delivery.getId());
+        if (existsRevision) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("A revision request already exists for this delivery.")
                             .build()
             );
         }
 
         RevisionRequest revisionRequest = RevisionRequest.builder()
-                .designDraft(draft)
+                .delivery(delivery)
                 .note(request.getNote())
+                .createdAt(LocalDate.now())
                 .build();
         revisionRequestRepo.save(revisionRequest);
 
         DesignComment sysComment = DesignComment.builder()
-                .designRequest(optDraft.get().getCloth().getDesignRequest())
-                .senderId(request.getSenderId())
-                .senderRole(request.getSenderRole())
+                .designRequest(delivery.getDesignRequest())
+                .senderId(0)
+                .senderRole("system")
                 .content("School requested a revision: " + request.getNote())
                 .creationDate(LocalDateTime.now())
                 .build();
@@ -232,6 +258,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                         .build()
         );
     }
+
 
     @Override
     public ResponseEntity<ResponseObject> getAllDesignComments(int designId) {
@@ -248,7 +275,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
 
         List<Map<String, Object>> mapList = designComments.stream()
                 .map(
-                        comment ->{
+                        comment -> {
                             Map<String, Object> map = new HashMap<>();
                             map.put("senderId", comment.getSenderId());
                             map.put("senderRole", comment.getSenderRole());
@@ -268,10 +295,23 @@ public class DesignRequestServiceImpl implements DesignRequestService {
 
     @Override
     public ResponseEntity<ResponseObject> getListDesignComplete() {
-        List<DesignRequest> completeList = designRequestRepo.findAllByStatus(Status.COMPLETED);
+
+        Integer accountId = GetCurrentLoginUser.getId();
+        String role = GetCurrentLoginUser.getRole();
+
+
+        if (accountId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("Invalid header")
+                            .build()
+            );
+        }
+
+        List<DesignRequest> completeList = designRequestRepo.findAllByStatusAndSchoolId(Status.COMPLETED, accountId);
 
         if (completeList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject.builder()
                             .message("No Design Requests found")
                             .build()
@@ -281,50 +321,42 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         List<Map<String, Object>> mapList = completeList.stream().map(request -> {
             Map<String, Object> requestMap = new HashMap<>();
             requestMap.put("id", request.getId());
-            requestMap.put("package", request.getPackageId());
             requestMap.put("creationDate", request.getCreationDate());
             requestMap.put("status", request.getStatus());
-            requestMap.put("private", request.isPrivate());
             requestMap.put("school", request.getSchoolId());
+
+            DesignDelivery delivery = designDeliveryRepo.findByDesignRequest_IdAndIsFinalTrue(request.getId());
+
+            requestMap.put("deliveryUrl", delivery == null ? null : delivery.getFileUrl());
 
             List<Cloth> cloths = clothRepo.getAllByDesignRequest_Id(request.getId());
             List<Map<String, Object>> clothMap = cloths.stream().map(cloth -> {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", cloth.getId());
-                map.put("logoHeight", cloth.getLogoHeight());
-                map.put("logoWidth", cloth.getLogoWidth());
-                map.put("templateId", cloth.getTemplate() != null ? cloth.getTemplate().getId() : 0);
+                map.put("gender", cloth.getGender().getValue());
                 map.put("clothCategory", cloth.getCategory().getValue());
                 map.put("clothType", cloth.getType().getValue());
                 map.put("color", cloth.getColor());
                 map.put("logoImage", cloth.getLogoImage());
-                map.put("logo_position", cloth.getLogoPosition());
                 map.put("note", cloth.getNote());
                 map.put("gender", cloth.getGender().toLowerCase());
 
-                DesignDraft designDraft = designDraftRepo.findByCloth_IdAndIsFinalTrue(cloth.getId());
-                if (designDraft != null) {
-                    Map<String, Object> draftMap = new HashMap<>();
-                    draftMap.put("id", designDraft.getId());
-                    draftMap.put("description", designDraft.getDescription());
-                    draftMap.put("designDate", designDraft.getDesignDate());
-                    draftMap.put("final", designDraft.isFinal());
+                List<FinalImage> finalImages = cloth.getFinalImages();
 
-                    List<DraftImage> draftImages = draftImageRepo.findAllByDesignDraft_Id(designDraft.getId());
-                    List<Map<String, Object>> imageMap = draftImages.stream().map(image -> {
-                        Map<String, Object> link = new HashMap<>();
-                        link.put("id", image.getId());
-                        link.put("url", image.getImageUrl());
-                        link.put("imageName", image.getName());
-                        return link;
-                    }).toList();
+                if (finalImages != null && !finalImages.isEmpty()) {
+                    List<Map<String, Object>> imageMap = finalImages.stream().map(
+                            finalImage -> {
+                                Map<String, Object> image = new HashMap<>();
+                                image.put("name", finalImage.getName());
+                                image.put("url", finalImage.getImageUrl());
+                                return image;
+                            }
+                    ).toList();
 
-                    draftMap.put("images", imageMap.isEmpty() ? null : imageMap);
-                    map.put("draft", draftMap);
-                } else{
-                    map.put("draft", null);
+                    map.put("finalImages", imageMap);
+                } else {
+                    map.put("finalImages", null);
                 }
-
                 return map;
             }).toList();
 
@@ -339,7 +371,6 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                         .build()
         );
     }
-
 
 
     private void createSampleImageByCloth(Cloth cloth, List<CreateDesignRequest.Image> images) {

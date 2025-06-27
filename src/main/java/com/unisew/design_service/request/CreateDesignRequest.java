@@ -2,6 +2,7 @@ package com.unisew.design_service.request;
 
 import com.unisew.design_service.enums.ClothCategory;
 import com.unisew.design_service.enums.ClothType;
+import com.unisew.design_service.enums.Gender;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -32,6 +33,7 @@ public class CreateDesignRequest {
         String color;
         String note;
         String designType;
+        String fabric;
     }
 
     @AllArgsConstructor
