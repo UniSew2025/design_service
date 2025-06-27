@@ -1,10 +1,14 @@
 package com.unisew.design_service.utils;
 
+import com.unisew.design_service.service.AccountService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class GetCurrentLoginUser {
+import java.util.HashMap;
+import java.util.Map;
+
+public class AccessCurrentLoginUser {
 
     public static Integer getId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -13,6 +17,14 @@ public class GetCurrentLoginUser {
             return Integer.valueOf(userDetails.getUsername());
         }
         return null;
+    }
+
+    public static Map<String, Object> getAccount(AccountService accountService) {
+        Integer id = getId();
+        if (id == null) {
+            return null;
+        }
+        return accountService.getAccountById(getId());
     }
 
     public static String getRole() {
