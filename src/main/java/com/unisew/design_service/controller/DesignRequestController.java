@@ -83,6 +83,7 @@ public class DesignRequestController {
     }
 
     @PostMapping("/deliveries")
+    @PreAuthorize("hasRole('SCHOOL')")
     public ResponseEntity<ResponseObject> submitDelivery(@RequestBody SubmitDeliveryRequest request) {
         return designDeliveryService.submitDelivery(request);
     }
