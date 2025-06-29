@@ -53,7 +53,16 @@ public class DesignServiceApplication {
                     .feedbackId(0)
                     .build();
 
-            designRequestRepo.saveAll(List.of(request1, request2));
+            DesignRequest request3 = DesignRequest.builder()
+                    .creationDate(LocalDate.now().minusDays(10))
+                    .isPrivate(true)
+                    .status(Status.COMPLETED)
+                    .schoolId(5)
+                    .packageId(1)
+                    .feedbackId(0)
+                    .build();
+
+            designRequestRepo.saveAll(List.of(request1, request2, request3));
 
             // ======== CLOTHS ========
             Cloth boyShirt = Cloth.builder()
@@ -103,7 +112,112 @@ public class DesignServiceApplication {
                     .designRequest(request2)
                     .build();
 
-            clothRepo.saveAll(List.of(boyShirt, girlSkirt, pePants, peShirt));
+            Cloth regularBoyShirt = Cloth
+                    .builder()
+                    .logoHeight(100)
+                    .logoWidth(100)
+                    .designRequest(request3)
+                    .template(null)
+                    .category(ClothCategory.REGULAR)
+                    .gender(Gender.BOY)
+                    .type(ClothType.SHIRT)
+                    .color("#FFFFFF")
+                    .fabric(Fabric.SILK)
+                    .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
+                    .logoPosition("top-left")
+                    .note("Regular boy shirt for primary students")
+                    .build();
+
+            Cloth regularBoyPant = Cloth
+                    .builder()
+                    .designRequest(request3)
+                    .category(ClothCategory.REGULAR)
+                    .gender(Gender.BOY)
+                    .type(ClothType.PANTS)
+                    .color("#000000")
+                    .fabric(Fabric.JEAN)
+                    .note("Regular boy pant for primary students")
+                    .build();
+
+            Cloth regularGirlShirt = Cloth
+                    .builder()
+                    .logoHeight(100)
+                    .logoWidth(100)
+                    .designRequest(request3)
+                    .category(ClothCategory.REGULAR)
+                    .gender(Gender.GIRL)
+                    .type(ClothType.SHIRT)
+                    .color("#FFFFFF")
+                    .fabric(Fabric.SILK)
+                    .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
+                    .logoPosition("top-left")
+                    .note("Regular girl shirt for primary students")
+                    .build();
+            Cloth regularGirlSkirt = Cloth
+                    .builder()
+                    .designRequest(request3)
+                    .category(ClothCategory.REGULAR)
+                    .gender(Gender.GIRL)
+                    .type(ClothType.SKIRT)
+                    .color("#000000")
+                    .fabric(Fabric.SILK)
+                    .note("Regular girt skirt for primary students")
+                    .build();
+            Cloth boyPEShirt = Cloth
+                    .builder()
+                    .logoHeight(200)
+                    .logoWidth(200)
+                    .designRequest(request3)
+                    .template(null)
+                    .category(ClothCategory.PHYSICAL_EDUCATION)
+                    .gender(Gender.BOY)
+                    .type(ClothType.SHIRT)
+                    .color("#f7d308")
+                    .fabric(Fabric.SILK)
+                    .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
+                    .logoPosition("back")
+                    .note("PE boy shirt for primary students")
+                    .build();
+            Cloth boyPEPant = Cloth
+                    .builder()
+                    .designRequest(request3)
+                    .category(ClothCategory.PHYSICAL_EDUCATION)
+                    .gender(Gender.BOY)
+                    .type(ClothType.PANTS)
+                    .color("#2c3e50")
+                    .fabric(Fabric.SILK)
+                    .note("PE boy pant for primary students")
+                    .build();
+            Cloth girlPEShirt = Cloth
+                    .builder()
+                    .logoHeight(200)
+                    .logoWidth(200)
+                    .designRequest(request3)
+                    .template(null)
+                    .category(ClothCategory.PHYSICAL_EDUCATION)
+                    .gender(Gender.GIRL)
+                    .type(ClothType.SHIRT)
+                    .color("#f7d308")
+                    .fabric(Fabric.SILK)
+                    .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
+                    .logoPosition("back")
+                    .note("PE boy shirt for primary students")
+                    .build();
+            Cloth girlPEPant = Cloth
+                    .builder()
+                    .designRequest(request3)
+                    .category(ClothCategory.PHYSICAL_EDUCATION)
+                    .gender(Gender.GIRL)
+                    .type(ClothType.PANTS)
+                    .color("#2c3e50")
+                    .fabric(Fabric.SILK)
+                    .note("PE girl pant for primary students")
+                    .build();
+            clothRepo.saveAll(List.of(
+                    boyShirt, girlSkirt, pePants, peShirt,
+                    regularBoyShirt, regularBoyPant, regularGirlShirt, regularGirlSkirt,
+                    boyPEShirt, boyPEPant, girlPEShirt, girlPEPant
+            ));
 
             // ======== DESIGN DELIVERY (each request has a delivery) ========
             DesignDelivery delivery1 = DesignDelivery.builder()
@@ -123,8 +237,16 @@ public class DesignServiceApplication {
                     .isFinal(false)
                     .note("First version for request2")
                     .build();
+            DesignDelivery delivery3 = DesignDelivery.builder()
+                    .designRequest(request3)
+                    .fileUrl("https://cdn.school.com/request2_delivery1.zip")
+                    .deliveryNumber(1)
+                    .submitDate(LocalDateTime.now().minusDays(5))
+                    .isFinal(true)
+                    .note("First version for request3")
+                    .build();
 
-            designDeliveryRepo.saveAll(List.of(delivery1, delivery2));
+            designDeliveryRepo.saveAll(List.of(delivery1, delivery2, delivery3));
 
             // ======== REVISION REQUESTS (attached to delivery) ========
             RevisionRequest rev1 = RevisionRequest.builder()
@@ -165,8 +287,52 @@ public class DesignServiceApplication {
                     .imageUrl("https://cdn.school.com/final_pe_shirt.png")
                     .cloth(peShirt)
                     .build();
+            FinalImage imageRegularBoyShirt = FinalImage.builder()
+                    .name("Regular boy shirt")
+                    .imageUrl("https://cdn.school.com/final_pe_shirt.png")
+                    .cloth(regularBoyShirt)
+                    .build();
+            FinalImage imageRegularBoyPant = FinalImage.builder()
+                    .name("Regular boy pant")
+                    .imageUrl("https://cdn.school.com/final_pe_shirt.png")
+                    .cloth(regularBoyPant)
+                    .build();
+            FinalImage imageRegularGirlShirt = FinalImage.builder()
+                    .name("Regular girl shirt")
+                    .imageUrl("https://cdn.school.com/final_pe_shirt.png")
+                    .cloth(regularGirlShirt)
+                    .build();
+            FinalImage imageRegularGirlSkirt = FinalImage.builder()
+                    .name("Regular girl skirt")
+                    .imageUrl("https://cdn.school.com/final_pe_shirt.png")
+                    .cloth(regularGirlSkirt)
+                    .build();
+            FinalImage imagePEBoyShirt = FinalImage.builder()
+                    .name("PE boy shirt")
+                    .imageUrl("https://cdn.school.com/final_pe_shirt.png")
+                    .cloth(boyPEShirt)
+                    .build();
+            FinalImage imagePEBoyPant = FinalImage.builder()
+                    .name("PE boy pant")
+                    .imageUrl("https://cdn.school.com/final_pe_shirt.png")
+                    .cloth(boyPEPant)
+                    .build();
+            FinalImage imagePEGirlShirt = FinalImage.builder()
+                    .name("PE girl shirt")
+                    .imageUrl("https://cdn.school.com/final_pe_shirt.png")
+                    .cloth(girlPEShirt)
+                    .build();
+            FinalImage imagePEGirlPant = FinalImage.builder()
+                    .name("PE girl pant")
+                    .imageUrl("https://cdn.school.com/final_pe_shirt.png")
+                    .cloth(girlPEPant)
+                    .build();
 
-            finalImageRepo.saveAll(List.of(image1, image2, image3, image4));
+
+
+            finalImageRepo.saveAll(List.of(image1, image2, image3,
+                    imageRegularBoyShirt,imageRegularBoyPant,imageRegularGirlShirt,imageRegularGirlSkirt,
+                    imagePEBoyShirt,imagePEBoyPant,imagePEGirlShirt,imagePEGirlPant));
 
             // ======== SAMPLE IMAGES ========
             String cloudinarySampleUrl = "https://res.cloudinary.com/di1aqthok/image/upload/v1750703944/onmapboetu92mv4hvxz0.jpg";
@@ -186,7 +352,45 @@ public class DesignServiceApplication {
                     .cloth(pePants)
                     .build();
 
-            sampleImageRepo.saveAll(List.of(sample1, sample2, sample3));
+            SampleImage sample4 = SampleImage.builder()
+                    .imageUrl(cloudinarySampleUrl)
+                    .cloth(regularBoyShirt)
+                    .build();
+
+            SampleImage sample5 = SampleImage.builder()
+                    .imageUrl(cloudinarySampleUrl)
+                    .cloth(regularBoyPant)
+                    .build();
+
+            SampleImage sample6 = SampleImage.builder()
+                    .imageUrl(cloudinarySampleUrl)
+                    .cloth(regularGirlShirt)
+                    .build();
+            SampleImage sample7 = SampleImage.builder()
+                    .imageUrl(cloudinarySampleUrl)
+                    .cloth(regularGirlSkirt)
+                    .build();
+            SampleImage sample8 = SampleImage.builder()
+                    .imageUrl(cloudinarySampleUrl)
+                    .cloth(boyPEShirt)
+                    .build();
+
+            SampleImage sample9 = SampleImage.builder()
+                    .imageUrl(cloudinarySampleUrl)
+                    .cloth(boyPEPant)
+                    .build();
+
+            SampleImage sample10 = SampleImage.builder()
+                    .imageUrl(cloudinarySampleUrl)
+                    .cloth(girlPEShirt)
+                    .build();
+            SampleImage sample11 = SampleImage.builder()
+                    .imageUrl(cloudinarySampleUrl)
+                    .cloth(girlPEPant)
+                    .build();
+
+
+            sampleImageRepo.saveAll(List.of(sample1, sample2, sample3,sample4,sample5,sample6,sample7,sample8,sample9,sample10,sample11));
 
             // ======== COMMENTS ========
             DesignComment comment1 = DesignComment.builder()
