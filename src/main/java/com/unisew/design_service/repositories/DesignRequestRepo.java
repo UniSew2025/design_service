@@ -10,4 +10,6 @@ public interface DesignRequestRepo extends JpaRepository<DesignRequest, Integer>
     List<DesignRequest> findAllByStatus(Status status);
 
     List<DesignRequest> findAllByStatusAndSchoolId(Status status, Integer accountId);
+
+    List<DesignRequest> findAllByPackageIdIn(List<Integer> packageIds);
 }

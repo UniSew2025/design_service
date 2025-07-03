@@ -29,8 +29,10 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     final SampleImageRepo sampleImageRepo;
     final DesignDeliveryRepo designDeliveryRepo;
     final RevisionRequestRepo revisionRequestRepo;
-    private final DesignCommentRepo designCommentRepo;
-    private final FinalImageRepo finalImageRepo;
+    final DesignCommentRepo designCommentRepo;
+    final FinalImageRepo finalImageRepo;
+    final ProfileService profileService;
+    final AccountService accountService;
 
     @Override
     public ResponseEntity<ResponseObject> getAllDesignRequests() {
@@ -96,9 +98,6 @@ public class DesignRequestServiceImpl implements DesignRequestService {
 
     @Override
     public ResponseEntity<ResponseObject> createDesignRequest(CreateDesignRequest request) {
-
-        //validation null(school, designer)
-
         DesignRequest designRequest = DesignRequest.builder()
                 .creationDate(LocalDate.now())
                 .schoolId(request.getSchoolId())
@@ -203,10 +202,6 @@ public class DesignRequestServiceImpl implements DesignRequestService {
 
     @Override
     public ResponseEntity<ResponseObject> createRevisionDesign(CreateRevisionDesignRequest request) {
-
-        Integer senderId = AccessCurrentLoginUser.getId();
-        String senderRole = AccessCurrentLoginUser.getRole();
-
 
         Optional<DesignDelivery> optDelivery = designDeliveryRepo.findById(request.getDeliveryId());
         if (optDelivery.isEmpty()) {
@@ -365,6 +360,132 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                 ResponseObject.builder()
                         .message("List Design Complete")
                         .data(mapList)
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> sendComment(SendCommentRequest request) {
+
+        DesignRequest designRequest = designRequestRepo.findById(request.getRequestId()).orElse(null);
+        if (designRequest == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("Can not find design request")
+                            .build()
+            );
+        }
+
+
+        Integer senderId = AccessCurrentLoginUser.getId();
+        String senderRole = AccessCurrentLoginUser.getRole();
+
+        DesignComment newComment = DesignComment
+                .builder()
+                .designRequest(designRequest)
+                .senderId(senderId)
+                .senderRole(senderRole)
+                .creationDate(LocalDateTime.now())
+                .content(request.getComment())
+                .build();
+
+        designCommentRepo.save(newComment);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ResponseObject.builder()
+                        .message("Comment sent successfully")
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> getAllDesignByPackageId(GetAllDesignByPackageIdRequest request) {
+
+        //can 2 ham internal 1 getProfile, 1 package tu profile_service
+
+
+//        Map<String, Object> response = profileService.getProfileInfo(accountId);
+//
+//        Map<String, Object> designer = (Map<String, Object>) response.get("designer");
+//        String designerName = (String) designer.get("name");
+        List<DesignRequest> list = designRequestRepo.findAllByPackageIdIn(request.getPackageIds());
+
+        if (list.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    ResponseObject.builder()
+                            .message("No Design Requests found")
+                            .build()
+            );
+        }
+        List<Map<String, Object>> mapList = list.stream().map(designRequest -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", designRequest.getId());
+            map.put("packageId", designRequest.getPackageId()); // -> thay bang package name
+            map.put("creationDate", designRequest.getCreationDate());
+            map.put("status", designRequest.getStatus());
+            map.put("private", designRequest.isPrivate());
+            map.put("school", profileService.getProfileInfo(designRequest.getSchoolId())); // -> thay bang school name
+            return map;
+        }).toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseObject.builder()
+                        .message("List DesignRequest by packageIds")
+                        .data(mapList)
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> getAllDeliveryByRequestId(int requestId) {
+
+        List<DesignDelivery> list = designDeliveryRepo.findAllByDesignRequest_Id(requestId);
+
+        if (list.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    ResponseObject.builder()
+                            .message("No Design Requests found")
+                            .build()
+            );
+        }
+
+        Integer accountId = AccessCurrentLoginUser.getId();
+
+        String accessToken = null;
+        if (accountId != null) {
+
+            Map<String, Object> tokenResponse = accountService.getGoogleAccessToken(accountId);
+            if (tokenResponse != null && tokenResponse.get("data") != null) {
+
+                Map<String, Object> data = (Map<String, Object>) tokenResponse.get("data");
+                accessToken = (String) data.get("access_token");
+            } else if (tokenResponse != null && tokenResponse.get("access_token") != null) {
+
+                accessToken = (String) tokenResponse.get("access_token");
+            }
+        }
+
+        List<Map<String, Object>> listMap = list.stream().map(
+                designDelivery -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", designDelivery.getId());
+                    map.put("submitDate", designDelivery.getSubmitDate());
+                    map.put("fileUrl", designDelivery.getFileUrl());
+                    map.put("note", designDelivery.getNote());
+                    map.put("deliveryNumber", designDelivery.getDeliveryNumber());
+                    map.put("isFinal", designDelivery.getIsFinal());
+                    return map;
+                }
+        ).toList();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("deliveries", listMap);
+        data.put("google_access_token", accessToken);
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseObject.builder()
+                        .message("List Design delivery successfully")
+                        .data(data)
                         .build()
         );
     }

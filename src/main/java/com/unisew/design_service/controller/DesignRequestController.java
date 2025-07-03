@@ -37,7 +37,7 @@ public class DesignRequestController {
     }
 
     @PostMapping("/request")
-    @PreAuthorize("hasRole('SCHOOL')")
+    @PreAuthorize("hasRole('SCHOOL') or hasRole('DESIGNER')")
     public ResponseEntity<ResponseObject> getRequestById(@RequestBody GetDesignRequestById request) {
         return designRequestService.getDesignRequestById(request);
     }
@@ -61,7 +61,7 @@ public class DesignRequestController {
     }
 
     @PostMapping("/cloth-list")
-    @PreAuthorize("hasRole('SCHOOL')")
+    @PreAuthorize("hasRole('SCHOOL') or hasRole('DESIGNER')")
     public ResponseEntity<ResponseObject> getListClothByRequestId(@RequestBody GetAllClothByRequestId request) {
         return clothService.getAllClothesByRequestId(request);
     }
@@ -83,9 +83,27 @@ public class DesignRequestController {
     }
 
     @PostMapping("/deliveries")
-    @PreAuthorize("hasRole('SCHOOL')")
+    @PreAuthorize("hasRole('DESIGNER')")
     public ResponseEntity<ResponseObject> submitDelivery(@RequestBody SubmitDeliveryRequest request) {
         return designDeliveryService.submitDelivery(request);
+    }
+
+    @PostMapping("/comment")
+    @PreAuthorize("hasRole('SCHOOL') or hasRole('DESIGNER')")
+    public ResponseEntity<ResponseObject> sendComment(@RequestBody SendCommentRequest request){
+        return designRequestService.sendComment(request);
+    }
+
+    @PostMapping("/design-request/list-packageId")
+    @PreAuthorize("hasRole('SCHOOL') or hasRole('DESIGNER')")
+    public ResponseEntity<ResponseObject> getAllDesignByPackageId(@RequestBody GetAllDesignByPackageIdRequest request) {
+        return designRequestService.getAllDesignByPackageId(request);
+    }
+
+    @GetMapping("/list-delivery/{id}")
+    @PreAuthorize("hasRole('SCHOOL') or hasRole('DESIGNER')")
+    public ResponseEntity<ResponseObject> getAllDeliveryByRequestId(@PathVariable("id") int id) {
+        return designRequestService.getAllDeliveryByRequestId(id);
     }
 
 }
