@@ -68,7 +68,7 @@ public class DesignServiceApplication {
             Cloth boyShirt = Cloth.builder()
                     .type(ClothType.PANTS)
                     .category(ClothCategory.REGULAR)
-                    .color("BLack")
+                    .color("#1D1C20")
                     .fabric(Fabric.COTTON)
                     .gender(Gender.BOY)
                     .note("Short sleeve white shirt for boys")
@@ -79,9 +79,9 @@ public class DesignServiceApplication {
             Cloth girlSkirt = Cloth.builder()
                     .type(ClothType.SHIRT)
                     .category(ClothCategory.REGULAR)
-                    .color("White")
+                    .color("#1D1C20")
                     .fabric(Fabric.POLYESTER)
-                    .gender(Gender.BOY)
+                    .gender(Gender.GIRL)
                     .note("Elementary school uniform skirts for girls")
                     .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
                     .logoPosition("Front belt")
@@ -93,7 +93,7 @@ public class DesignServiceApplication {
             Cloth pePants = Cloth.builder()
                     .type(ClothType.PANTS)
                     .category(ClothCategory.PHYSICAL_EDUCATION)
-                    .color("Dark gray")
+                    .color("#1D1C20")
                     .fabric(Fabric.SILK)
                     .gender(Gender.BOY)
                     .note("Educate pants for male students")
@@ -104,7 +104,7 @@ public class DesignServiceApplication {
             Cloth peShirt = Cloth.builder()
                     .type(ClothType.SHIRT)
                     .category(ClothCategory.PHYSICAL_EDUCATION)
-                    .color("White with blue")
+                    .color("#1D1C20")
                     .fabric(Fabric.DENIM)
                     .gender(Gender.BOY)
                     .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
@@ -201,7 +201,7 @@ public class DesignServiceApplication {
                     .fabric(Fabric.SILK)
                     .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
                     .logoPosition("back")
-                    .note("PE boy shirt for primary students")
+                    .note("PE girl shirt for primary students")
                     .build();
             Cloth girlPEPant = Cloth
                     .builder()
@@ -266,25 +266,25 @@ public class DesignServiceApplication {
             // ======== FINAL IMAGES (attached to cloth) ========
             FinalImage image1 = FinalImage.builder()
                     .name("Men's shirt front")
-                    .imageUrl("https://cdn.school.com/final_boy_shirt_front.png")
+                    .imageUrl("https://elementsworld.in/wp-content/uploads/2016/11/school-1.jpg")
                     .cloth(boyShirt)
                     .build();
 
             FinalImage image2 = FinalImage.builder()
                     .name("Girl skirt final")
-                    .imageUrl("https://cdn.school.com/final_girl_skirt.png")
+                    .imageUrl("https://elementsworld.in/wp-content/uploads/2016/11/school-1.jpg")
                     .cloth(girlSkirt)
                     .build();
 
             FinalImage image3 = FinalImage.builder()
                     .name("PE pants")
-                    .imageUrl("https://cdn.school.com/final_pe_pants.png")
+                    .imageUrl("https://elementsworld.in/wp-content/uploads/2016/11/school-1.jpg")
                     .cloth(pePants)
                     .build();
 
             FinalImage image4 = FinalImage.builder()
                     .name("PE shirt")
-                    .imageUrl("https://cdn.school.com/final_pe_shirt.png")
+                    .imageUrl("https://elementsworld.in/wp-content/uploads/2016/11/school-1.jpg")
                     .cloth(peShirt)
                     .build();
             FinalImage imageRegularBoyShirt = FinalImage.builder()
