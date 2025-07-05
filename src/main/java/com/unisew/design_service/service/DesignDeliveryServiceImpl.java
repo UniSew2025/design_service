@@ -85,7 +85,7 @@ public class DesignDeliveryServiceImpl implements DesignDeliveryService {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseObject.builder()
-                        .message("Submit delivery thành công. Delivery #" + nextDeliveryNumber)
+                        .message("Submit delivery successfully. Delivery #" + nextDeliveryNumber)
                         .data(responseMap)
                         .build()
         );
