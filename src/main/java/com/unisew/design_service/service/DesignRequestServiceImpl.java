@@ -113,7 +113,6 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                     .category(cloth.getCategory())
                     .logoImage(cloth.getLogoImage())
                     .logoPosition(cloth.getLogoPosition())
-                    .fabric(Fabric.valueOf(cloth.getFabric()))
                     .designRequest(designRequest)
                     .color(cloth.getColor())
                     .note(cloth.getNote())
@@ -187,6 +186,14 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
                             .message("Can not find Design Request with " + request.getDesignRequestId())
+                            .build()
+            );
+        }
+
+        if(!designRequest.isPrivate()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("design already public")
                             .build()
             );
         }
@@ -375,6 +382,15 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                             .build()
             );
         }
+
+        if(designRequest.getDeliveries().stream().anyMatch(DesignDelivery::getIsFinal)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("Can not send comment because it is final")
+                            .build()
+            );
+        }
+
 
 
         Integer senderId = AccessCurrentLoginUser.getId();
