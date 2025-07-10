@@ -92,7 +92,7 @@ public class DesignServiceApplication {
 
             Cloth pePants = Cloth.builder()
                     .type(ClothType.PANTS)
-                    .category(ClothCategory.PHYSICAL_EDUCATION)
+                    .category(ClothCategory.PHYSICAL)
                     .color("Dark gray")
                     .fabric(Fabric.SILK)
                     .gender(Gender.BOY)
@@ -103,7 +103,7 @@ public class DesignServiceApplication {
 
             Cloth peShirt = Cloth.builder()
                     .type(ClothType.SHIRT)
-                    .category(ClothCategory.PHYSICAL_EDUCATION)
+                    .category(ClothCategory.PHYSICAL)
                     .color("White with blue")
                     .fabric(Fabric.DENIM)
                     .gender(Gender.BOY)
@@ -169,7 +169,7 @@ public class DesignServiceApplication {
                     .logoWidth(200)
                     .designRequest(request3)
                     .template(null)
-                    .category(ClothCategory.PHYSICAL_EDUCATION)
+                    .category(ClothCategory.PHYSICAL)
                     .gender(Gender.BOY)
                     .type(ClothType.SHIRT)
                     .color("#f7d308")
@@ -181,7 +181,7 @@ public class DesignServiceApplication {
             Cloth boyPEPant = Cloth
                     .builder()
                     .designRequest(request3)
-                    .category(ClothCategory.PHYSICAL_EDUCATION)
+                    .category(ClothCategory.PHYSICAL)
                     .gender(Gender.BOY)
                     .type(ClothType.PANTS)
                     .color("#2c3e50")
@@ -194,7 +194,7 @@ public class DesignServiceApplication {
                     .logoWidth(200)
                     .designRequest(request3)
                     .template(null)
-                    .category(ClothCategory.PHYSICAL_EDUCATION)
+                    .category(ClothCategory.PHYSICAL)
                     .gender(Gender.GIRL)
                     .type(ClothType.SHIRT)
                     .color("#f7d308")
@@ -206,7 +206,7 @@ public class DesignServiceApplication {
             Cloth girlPEPant = Cloth
                     .builder()
                     .designRequest(request3)
-                    .category(ClothCategory.PHYSICAL_EDUCATION)
+                    .category(ClothCategory.PHYSICAL)
                     .gender(Gender.GIRL)
                     .type(ClothType.PANTS)
                     .color("#2c3e50")
