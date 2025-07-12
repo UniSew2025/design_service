@@ -41,6 +41,10 @@ public class DesignServiceApplication {
                     .status(Status.COMPLETED)
                     .schoolId(5)
                     .packageId(1)
+                    .packageName("Basic Design")
+                    .packagePrice(1000000)
+                    .packageDeliveryDate(5)
+                    .revisionTime(2)
                     .feedbackId(0)
                     .build();
 
@@ -50,6 +54,10 @@ public class DesignServiceApplication {
                     .status(Status.PAID)
                     .schoolId(5)
                     .packageId(1)
+                    .packageName("Basic Design")
+                    .packagePrice(1000000)
+                    .packageDeliveryDate(5)
+                    .revisionTime(2)
                     .feedbackId(0)
                     .build();
 
@@ -59,6 +67,10 @@ public class DesignServiceApplication {
                     .status(Status.COMPLETED)
                     .schoolId(5)
                     .packageId(1)
+                    .packageName("Basic Design")
+                    .packagePrice(1000000)
+                    .packageDeliveryDate(5)
+                    .revisionTime(2)
                     .feedbackId(0)
                     .build();
 
