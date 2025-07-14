@@ -44,8 +44,15 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                     response.put("school", request.getSchoolId());
                     response.put("private", request.isPrivate());
                     response.put("package", request.getPackageId());
+                    response.put("packageName", request.getPackageName());
+                    response.put("packagePrice", request.getPackagePrice());
+                    response.put("headerContent", request.getPackageHeaderContent());
+                    response.put("revisionTime", request.getRevisionTime());
+                    response.put("deliveryDate", request.getPackageDeliveryDate());
+                    response.put("creationDate",request.getCreationDate());
                     response.put("feedback", request.getFeedbackId());
                     response.put("status", request.getStatus().getValue());
+
                     return response;
                 }
         ).toList();
@@ -438,6 +445,11 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             map.put("id", designRequest.getId());
             map.put("packageId", designRequest.getPackageId()); // -> thay bang package name
             map.put("creationDate", designRequest.getCreationDate());
+            map.put("packageName", designRequest.getPackageName());
+            map.put("packagePrice", designRequest.getPackagePrice());
+            map.put("headerContent", designRequest.getPackageHeaderContent());
+            map.put("revisionTime", designRequest.getRevisionTime());
+            map.put("deliveryDate", designRequest.getPackageDeliveryDate());
             map.put("status", designRequest.getStatus());
             map.put("private", designRequest.isPrivate());
             map.put("school", profileService.getProfileInfo(designRequest.getSchoolId())); // -> thay bang school name

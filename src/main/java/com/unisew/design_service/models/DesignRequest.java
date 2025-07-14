@@ -36,6 +36,21 @@ public class DesignRequest {
     @Column(name = "`package_id`")
     Integer packageId;
 
+    @Column(name = "`package_name`")
+    String packageName;
+
+    @Column(name = "`package_header_content`")
+    String packageHeaderContent;
+
+    @Column(name = "`package_delivery_date`")
+    int packageDeliveryDate;
+
+    @Column(name = "`revision_time`")
+    int revisionTime;
+
+    @Column(name = "`package_price`")
+    long packagePrice;
+
     @OneToMany(mappedBy = "designRequest")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
