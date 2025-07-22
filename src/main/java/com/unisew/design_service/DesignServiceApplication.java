@@ -38,14 +38,14 @@ public class DesignServiceApplication {
             DesignRequest request1 = DesignRequest.builder()
                     .creationDate(LocalDate.now().minusDays(10))
                     .isPrivate(true)
-                    .status(Status.COMPLETED)
+                    .status(Status.CREATED)
                     .schoolId(5)
-                    .packageId(1)
-                    .packageName("Basic Design")
-                    .packagePrice(1000000)
-                    .packageDeliveryDate(5)
-                    .revisionTime(2)
-                    .feedbackId(0)
+                    .packageId(null)
+                    .packageName(null)
+                    .packagePrice(0)
+                    .packageDeliveryDate(0)
+                    .revisionTime(0)
+                    .feedbackId(null)
                     .build();
 
             DesignRequest request2 = DesignRequest.builder()
@@ -80,7 +80,7 @@ public class DesignServiceApplication {
             Cloth boyShirt = Cloth.builder()
                     .type(ClothType.PANTS)
                     .category(ClothCategory.REGULAR)
-                    .color("BLack")
+                    .color("#1D1C20")
                     .fabric(Fabric.COTTON)
                     .gender(Gender.BOY)
                     .note("Short sleeve white shirt for boys")
@@ -91,9 +91,9 @@ public class DesignServiceApplication {
             Cloth girlSkirt = Cloth.builder()
                     .type(ClothType.SHIRT)
                     .category(ClothCategory.REGULAR)
-                    .color("White")
+                    .color("#1D1C20")
                     .fabric(Fabric.POLYESTER)
-                    .gender(Gender.BOY)
+                    .gender(Gender.GIRL)
                     .note("Elementary school uniform skirts for girls")
                     .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
                     .logoPosition("Front belt")
@@ -213,7 +213,7 @@ public class DesignServiceApplication {
                     .fabric(Fabric.SILK)
                     .logoImage("https://res.cloudinary.com/di1aqthok/image/upload/v1750783862/yaepvqd7lvcze1rdyght.jpg")
                     .logoPosition("back")
-                    .note("PE boy shirt for primary students")
+                    .note("PE girl shirt for primary students")
                     .build();
             Cloth girlPEPant = Cloth
                     .builder()
@@ -281,25 +281,25 @@ public class DesignServiceApplication {
             // ======== FINAL IMAGES (attached to cloth) ========
             FinalImage image1 = FinalImage.builder()
                     .name("Men's shirt front")
-                    .imageUrl("https://cdn.school.com/final_boy_shirt_front.png")
+                    .imageUrl("https://elementsworld.in/wp-content/uploads/2016/11/school-1.jpg")
                     .cloth(boyShirt)
                     .build();
 
             FinalImage image2 = FinalImage.builder()
                     .name("Girl skirt final")
-                    .imageUrl("https://cdn.school.com/final_girl_skirt.png")
+                    .imageUrl("https://elementsworld.in/wp-content/uploads/2016/11/school-1.jpg")
                     .cloth(girlSkirt)
                     .build();
 
             FinalImage image3 = FinalImage.builder()
                     .name("PE pants")
-                    .imageUrl("https://cdn.school.com/final_pe_pants.png")
+                    .imageUrl("https://elementsworld.in/wp-content/uploads/2016/11/school-1.jpg")
                     .cloth(pePants)
                     .build();
 
             FinalImage image4 = FinalImage.builder()
                     .name("PE shirt")
-                    .imageUrl("https://cdn.school.com/final_pe_shirt.png")
+                    .imageUrl("https://elementsworld.in/wp-content/uploads/2016/11/school-1.jpg")
                     .cloth(peShirt)
                     .build();
             FinalImage imageRegularBoyShirt = FinalImage.builder()
