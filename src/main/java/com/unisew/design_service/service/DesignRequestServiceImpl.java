@@ -174,7 +174,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         }
 
         designRequest.setPackageId(request.getPackageId());
-        designRequest.setStatus(Status.UNPAID);
+        designRequest.setStatus(Status.PAID);
         designRequestRepo.save(designRequest);
 
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -227,8 +227,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         }
         DesignDelivery delivery = optDelivery.get();
 
-        if (Boolean.TRUE
-                .equals(delivery.getIsFinal())) {
+        if (delivery.isFinal()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
                             .message("Cannot create revision: Delivery has been finalized.")
@@ -390,7 +389,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             );
         }
 
-        if(designRequest.getDeliveries().stream().anyMatch(DesignDelivery::getIsFinal)){
+        if(designRequest.getDeliveries().stream().anyMatch(DesignDelivery::isFinal)){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
                             .message("Can not send comment because it is final")
@@ -501,7 +500,23 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                     map.put("fileUrl", designDelivery.getFileUrl());
                     map.put("note", designDelivery.getNote());
                     map.put("deliveryNumber", designDelivery.getDeliveryNumber());
-                    map.put("isFinal", designDelivery.getIsFinal());
+                    map.put("isFinal", designDelivery.isFinal());
+                    map.put("isRevision", designDelivery.isRevision());
+
+                    List<RevisionRequest> revisionRequestList = designDelivery.getRevisionRequests();
+                    if(revisionRequestList != null && !revisionRequestList.isEmpty()){
+                       List<Map<String, Object>> revisionMap = revisionRequestList.stream().map(
+                               revisionRequest -> {
+                                   Map<String, Object> revision = new HashMap<>();
+                                   revision.put("id", revisionRequest.getId());
+                                   revision.put("deliveryId", revisionRequest.getDelivery().getId());
+                                   revision.put("createAt", revisionRequest.getCreatedAt());
+                                   revision.put("note", revisionRequest.getNote());
+                                   return revision;
+                               }
+                       ).toList();
+                       map.put("revision", revisionMap);
+                    }
                     return map;
                 }
         ).toList();

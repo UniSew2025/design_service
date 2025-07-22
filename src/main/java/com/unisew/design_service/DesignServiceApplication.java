@@ -238,6 +238,7 @@ public class DesignServiceApplication {
                     .deliveryNumber(1)
                     .submitDate(LocalDateTime.now().minusDays(8))
                     .isFinal(true)
+                    .isRevision(true)
                     .note("Initial delivery for request1")
                     .build();
 
@@ -247,6 +248,7 @@ public class DesignServiceApplication {
                     .deliveryNumber(1)
                     .submitDate(LocalDateTime.now().minusDays(5))
                     .isFinal(false)
+                    .isRevision(false)
                     .note("First version for request2")
                     .build();
             DesignDelivery delivery3 = DesignDelivery.builder()
@@ -255,6 +257,7 @@ public class DesignServiceApplication {
                     .deliveryNumber(1)
                     .submitDate(LocalDateTime.now().minusDays(5))
                     .isFinal(true)
+                    .isRevision(true)
                     .note("First version for request3")
                     .build();
 
