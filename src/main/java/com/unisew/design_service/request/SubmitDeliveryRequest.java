@@ -17,4 +17,6 @@ public class SubmitDeliveryRequest {
     private Integer requestId;
     private String fileUrl;
     private String note;
+    private boolean isRevision;
+    private Integer revisionId;
 }

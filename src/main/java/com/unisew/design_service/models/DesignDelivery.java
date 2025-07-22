@@ -27,11 +27,16 @@ public class DesignDelivery {
     String fileUrl;
     Integer deliveryNumber;
     LocalDateTime submitDate;
-    Boolean isFinal;
+    boolean isFinal;
     String note;
+    boolean isRevision;
 
     @OneToMany(mappedBy = "delivery")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<RevisionRequest> revisionRequests;
+
+    @OneToOne
+    @JoinColumn(name = "`revision_id`")
+    RevisionRequest parentRevision;
 }

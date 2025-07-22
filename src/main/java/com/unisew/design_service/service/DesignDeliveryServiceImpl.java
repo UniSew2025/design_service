@@ -1,16 +1,8 @@
 package com.unisew.design_service.service;
 
 import com.unisew.design_service.enums.Status;
-import com.unisew.design_service.models.Cloth;
-import com.unisew.design_service.models.DesignComment;
-import com.unisew.design_service.models.DesignDelivery;
-import com.unisew.design_service.models.DesignRequest;
-import com.unisew.design_service.models.FinalImage;
-import com.unisew.design_service.repositories.ClothRepo;
-import com.unisew.design_service.repositories.DesignCommentRepo;
-import com.unisew.design_service.repositories.DesignDeliveryRepo;
-import com.unisew.design_service.repositories.DesignRequestRepo;
-import com.unisew.design_service.repositories.FinalImageRepo;
+import com.unisew.design_service.models.*;
+import com.unisew.design_service.repositories.*;
 import com.unisew.design_service.request.CreateDesignDraftRequest;
 import com.unisew.design_service.request.SetDesignDraftFinalRequest;
 import com.unisew.design_service.request.SubmitDeliveryRequest;
@@ -36,6 +28,7 @@ public class DesignDeliveryServiceImpl implements DesignDeliveryService {
     final FinalImageRepo finalImageRepo;
     final DesignCommentRepo designCommentRepo;
     final DesignDeliveryRepo designDeliveryRepo;
+    private final RevisionRequestRepo revisionRequestRepo;
 
 
     @Override
@@ -58,12 +51,16 @@ public class DesignDeliveryServiceImpl implements DesignDeliveryService {
         Optional<DesignDelivery> latestDelivery = designDeliveryRepo.findTopByDesignRequest_IdOrderByDeliveryNumberDesc(request.getRequestId());
         int nextDeliveryNumber = latestDelivery.map(d -> d.getDeliveryNumber() + 1).orElse(1);
 
+        RevisionRequest revisionRequest = revisionRequestRepo.findById(request.getRequestId()).orElse(null);
+
         DesignDelivery delivery = DesignDelivery.builder()
                 .designRequest(designRequest)
                 .fileUrl(request.getFileUrl())
                 .deliveryNumber(nextDeliveryNumber)
                 .submitDate(LocalDateTime.now())
+                .parentRevision(revisionRequest)
                 .isFinal(false)
+                .isRevision(request.isRevision())
                 .note(request.getNote())
                 .build();
         designDeliveryRepo.save(delivery);
