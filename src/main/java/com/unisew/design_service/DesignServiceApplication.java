@@ -41,6 +41,10 @@ public class DesignServiceApplication {
                     .status(Status.COMPLETED)
                     .schoolId(5)
                     .packageId(1)
+                    .packageName("Basic Design")
+                    .packagePrice(1000000)
+                    .packageDeliveryDate(5)
+                    .revisionTime(2)
                     .feedbackId(0)
                     .build();
 
@@ -50,6 +54,10 @@ public class DesignServiceApplication {
                     .status(Status.PAID)
                     .schoolId(5)
                     .packageId(1)
+                    .packageName("Basic Design")
+                    .packagePrice(1000000)
+                    .packageDeliveryDate(5)
+                    .revisionTime(2)
                     .feedbackId(0)
                     .build();
 
@@ -59,6 +67,10 @@ public class DesignServiceApplication {
                     .status(Status.COMPLETED)
                     .schoolId(5)
                     .packageId(1)
+                    .packageName("Basic Design")
+                    .packagePrice(1000000)
+                    .packageDeliveryDate(5)
+                    .revisionTime(2)
                     .feedbackId(0)
                     .build();
 
@@ -226,6 +238,7 @@ public class DesignServiceApplication {
                     .deliveryNumber(1)
                     .submitDate(LocalDateTime.now().minusDays(8))
                     .isFinal(true)
+                    .isRevision(true)
                     .note("Initial delivery for request1")
                     .build();
 
@@ -235,6 +248,7 @@ public class DesignServiceApplication {
                     .deliveryNumber(1)
                     .submitDate(LocalDateTime.now().minusDays(5))
                     .isFinal(false)
+                    .isRevision(false)
                     .note("First version for request2")
                     .build();
             DesignDelivery delivery3 = DesignDelivery.builder()
@@ -243,6 +257,7 @@ public class DesignServiceApplication {
                     .deliveryNumber(1)
                     .submitDate(LocalDateTime.now().minusDays(5))
                     .isFinal(true)
+                    .isRevision(true)
                     .note("First version for request3")
                     .build();
 

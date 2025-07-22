@@ -54,10 +54,10 @@ public class Cloth {
     String logoPosition;
 
     @Column(name = "`logo_width`")
-    int logoWidth;
+    double logoWidth;
 
     @Column(name = "`logo_height`")
-    int logoHeight;
+    double logoHeight;
 
     String color;
 

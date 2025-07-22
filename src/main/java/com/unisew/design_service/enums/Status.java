@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 public enum Status {
 
     CREATED("created"),// vua tao ra
-    UNPAID("unpaid"), // da chon package chua thanh toan
     PAID("paid"), // da thanh toan package
     DESIGNING("designing"), // dang duoc thiet ke
     COMPLETED("completed"); //da hoan thanh
