@@ -1,6 +1,5 @@
 package com.unisew.design_service.service;
 
-import com.unisew.design_service.enums.Fabric;
 import com.unisew.design_service.enums.Gender;
 import com.unisew.design_service.enums.Status;
 import com.unisew.design_service.models.*;
@@ -25,7 +24,7 @@ import java.util.*;
 public class DesignRequestServiceImpl implements DesignRequestService {
 
     final DesignRequestRepo designRequestRepo;
-    final ClothRepo clothRepo;
+    final DesignItemRepo designItemRepo;
     final SampleImageRepo sampleImageRepo;
     final DesignDeliveryRepo designDeliveryRepo;
     final RevisionRequestRepo revisionRequestRepo;
@@ -42,7 +41,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                     Map<String, Object> response = new HashMap<>();
                     response.put("id", request.getId());
                     response.put("school", request.getSchoolId());
-                    response.put("private", request.isPrivate());
+                    response.put("private", request.isDesignPrivate());
                     response.put("package", request.getPackageId());
                     response.put("packageName", request.getPackageName());
                     response.put("packagePrice", request.getPackagePrice());
@@ -117,7 +116,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         Map<String, Object> map = new HashMap<>();
         map.put("id", designRequest.getId());
         map.put("school", designRequest.getSchoolId());
-        map.put("private", designRequest.isPrivate());
+        map.put("private", designRequest.isDesignPrivate());
         map.put("feedback", designRequest.getFeedbackId());
         map.put("status", designRequest.getStatus());
 
@@ -135,13 +134,13 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         DesignRequest designRequest = DesignRequest.builder()
                 .creationDate(LocalDate.now())
                 .schoolId(request.getSchoolId())
-                .isPrivate(true)
+                .designPrivate(true)
                 .status(Status.CREATED)
                 .build();
         designRequestRepo.save(designRequest);
 
         for (CreateDesignRequest.Cloth cloth : request.getClothes()) {
-            Cloth newCloth = clothRepo.save(Cloth.builder()
+            DesignItem newDesignItem = designItemRepo.save(DesignItem.builder()
                     .type(cloth.getType())
                     .gender(Gender.valueOf(cloth.getGender()))
                     .category(cloth.getCategory())
@@ -154,7 +153,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
 
             if (cloth.getDesignType().equals("TEMPLATE")) {
 
-                Cloth template = clothRepo.findById(cloth.getTemplateId()).orElse(null);
+                DesignItem template = designItemRepo.findById(cloth.getTemplateId()).orElse(null);
                 if (template == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                             ResponseObject.builder()
@@ -162,12 +161,12 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                                     .build()
                     );
                 }
-                newCloth.setTemplate(template);
-                clothRepo.save(newCloth);
+                newDesignItem.setTemplate(template);
+                designItemRepo.save(newDesignItem);
             }
 
             if (cloth.getDesignType().equals("UPLOAD")) {
-                createSampleImageByCloth(newCloth, cloth.getImages());
+                createSampleImageByCloth(newDesignItem, cloth.getImages());
             }
         }
 
@@ -229,7 +228,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             );
         }
 
-        if(!designRequest.isPrivate()){
+        if(!designRequest.isDesignPrivate()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
                             .message("design already public")
@@ -237,7 +236,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             );
         }
 
-        designRequest.setPrivate(false);
+        designRequest.setDesignPrivate(false);
         designRequestRepo.save(designRequest);
         return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseObject.builder()
@@ -259,7 +258,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         }
         DesignDelivery delivery = optDelivery.get();
 
-        if (delivery.isFinal()) {
+        if (delivery.isDesignFinal()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
                             .message("Cannot create revision: Delivery has been finalized.")
@@ -270,7 +269,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         RevisionRequest revisionRequest = RevisionRequest.builder()
                 .delivery(delivery)
                 .note(request.getNote())
-                .createdAt(LocalDate.now())
+                .requestDate(LocalDate.now())
                 .build();
         revisionRequestRepo.save(revisionRequest);
 
@@ -354,12 +353,12 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             requestMap.put("status", request.getStatus());
             requestMap.put("school", request.getSchoolId());
 
-            DesignDelivery delivery = designDeliveryRepo.findByDesignRequest_IdAndIsFinalTrue(request.getId());
+            DesignDelivery delivery = designDeliveryRepo.findByDesignRequest_IdAndDesignFinalTrue(request.getId());
 
             requestMap.put("deliveryUrl", delivery == null ? null : delivery.getFileUrl());
 
-            List<Cloth> cloths = clothRepo.getAllByDesignRequest_Id(request.getId());
-            List<Map<String, Object>> clothMap = cloths.stream().map(cloth -> {
+            List<DesignItem> designItems = designItemRepo.getAllByDesignRequest_Id(request.getId());
+            List<Map<String, Object>> clothMap = designItems.stream().map(cloth -> {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", cloth.getId());
                 map.put("gender", cloth.getGender().getValue());
@@ -412,7 +411,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             );
         }
 
-        if(designRequest.getDeliveries().stream().anyMatch(DesignDelivery::isFinal)){
+        if(designRequest.getDeliveries().stream().anyMatch(DesignDelivery::isDesignFinal)){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     ResponseObject.builder()
                             .message("Can not send comment because it is final")
@@ -473,7 +472,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             map.put("revisionTime", designRequest.getRevisionTime());
             map.put("deliveryDate", designRequest.getPackageDeliveryDate());
             map.put("status", designRequest.getStatus());
-            map.put("private", designRequest.isPrivate());
+            map.put("private", designRequest.isDesignPrivate());
             map.put("school", profileService.getProfileInfo(designRequest.getSchoolId())); // -> thay bang school name
             return map;
         }).toList();
@@ -523,7 +522,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                     map.put("fileUrl", designDelivery.getFileUrl());
                     map.put("note", designDelivery.getNote());
                     map.put("deliveryNumber", designDelivery.getDeliveryNumber());
-                    map.put("isFinal", designDelivery.isFinal());
+                    map.put("isFinal", designDelivery.isDesignFinal());
                     map.put("isRevision", designDelivery.isRevision());
 
                     List<RevisionRequest> revisionRequestList = designDelivery.getRevisionRequests();
@@ -533,7 +532,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                                    Map<String, Object> revision = new HashMap<>();
                                    revision.put("id", revisionRequest.getId());
                                    revision.put("deliveryId", revisionRequest.getDelivery().getId());
-                                   revision.put("createAt", revisionRequest.getCreatedAt());
+                                   revision.put("createAt", revisionRequest.getRequestDate());
                                    revision.put("note", revisionRequest.getNote());
                                    return revision;
                                }
@@ -557,12 +556,12 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     }
 
 
-    private void createSampleImageByCloth(Cloth cloth, List<CreateDesignRequest.Image> images) {
+    private void createSampleImageByCloth(DesignItem designItem, List<CreateDesignRequest.Image> images) {
         for (CreateDesignRequest.Image image : images) {
             sampleImageRepo.save(
                     SampleImage.builder()
                             .imageUrl(image.getUrl())
-                            .cloth(cloth)
+                            .designItem(designItem)
                             .build());
         }
     }

@@ -24,12 +24,22 @@ public class DesignDelivery {
     @JoinColumn(name = "`design_request_id`")
     DesignRequest designRequest;
 
+    @Column(name = "`file_url`")
     String fileUrl;
+
+    @Column(name = "`delivery_number`")
     Integer deliveryNumber;
+
+    @Column(name = "`submit_date`")
     LocalDateTime submitDate;
-    boolean isFinal;
+
+    @Column(name = "`is_final`")
+    boolean designFinal;
+
     String note;
-    boolean isRevision;
+
+    @Column(name = "`is_revision`")
+    boolean revision;
 
     @OneToMany(mappedBy = "delivery")
     @ToString.Exclude

@@ -31,9 +31,9 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "`cloth`")
+@Table(name = "`design_item`")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Cloth {
+public class DesignItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -73,7 +73,7 @@ public class Cloth {
     @JoinColumn(name = "`request_id`")
     DesignRequest designRequest;
 
-    @OneToMany(mappedBy = "cloth")
+    @OneToMany(mappedBy = "designItem")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<SampleImage> sampleImages;
@@ -82,9 +82,9 @@ public class Cloth {
     @JoinColumn(name = "template_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    Cloth template;
+    DesignItem template;
 
-    @OneToMany(mappedBy = "cloth")
+    @OneToMany(mappedBy = "designItem")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<FinalImage> finalImages;

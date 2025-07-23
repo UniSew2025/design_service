@@ -1,5 +1,6 @@
 package com.unisew.design_service.models;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -35,7 +36,8 @@ public class RevisionRequest {
 
     String note;
 
-    LocalDate createdAt;
+    @Column(name = "`request_date")
+    LocalDate requestDate;
 
     @ManyToOne
     @JoinColumn(name = "`delivery_id`")
