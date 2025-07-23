@@ -1,8 +1,8 @@
 package com.unisew.design_service.service;
 
-import com.unisew.design_service.models.Cloth;
+import com.unisew.design_service.models.DesignItem;
 import com.unisew.design_service.models.SampleImage;
-import com.unisew.design_service.repositories.ClothRepo;
+import com.unisew.design_service.repositories.DesignItemRepo;
 import com.unisew.design_service.repositories.SampleImageRepo;
 import com.unisew.design_service.request.GetAllClothByRequestId;
 import com.unisew.design_service.response.ResponseObject;
@@ -13,26 +13,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ClothServiceImpl implements ClothService {
 
-    final ClothRepo clothRepo;
+    final DesignItemRepo designItemRepo;
     final SampleImageRepo sampleImageRepo;
 
     @Override
     public ResponseEntity<ResponseObject> getAllClothesByRequestId(GetAllClothByRequestId request) {
 
-        List<Cloth> clothList = clothRepo.getAllByDesignRequest_Id(request.getRequestId());
+        List<DesignItem> designItemList = designItemRepo.getAllByDesignRequest_Id(request.getRequestId());
 
-        if (clothList.isEmpty()) {
+        if (designItemList.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject.builder()
                             .message("no cloth found")
@@ -40,7 +38,7 @@ public class ClothServiceImpl implements ClothService {
             );
         }
 
-        List<Map<String, Object>> mappedCloths = clothList.stream().map(cloth -> {
+        List<Map<String, Object>> mappedCloths = designItemList.stream().map(cloth -> {
             Map<String, Object> map = new HashMap<>();
             map.put("logo_height", cloth.getLogoHeight());
             map.put("logo_width", cloth.getLogoWidth());
@@ -53,7 +51,7 @@ public class ClothServiceImpl implements ClothService {
             map.put("logo_position", cloth.getLogoPosition());
             map.put("note", cloth.getNote());
 
-            List<SampleImage> sampleImages = sampleImageRepo.findAllByCloth_Id(cloth.getId());
+            List<SampleImage> sampleImages = sampleImageRepo.findAllByDesignItem_Id(cloth.getId());
 
             List<Map<String,Object>> mapImages = sampleImages.stream()
                     .map(
@@ -81,9 +79,9 @@ public class ClothServiceImpl implements ClothService {
     @Override
     public ResponseEntity<ResponseObject> getAllClothes() {
 
-        List<Cloth> cloths = clothRepo.findAll();
+        List<DesignItem> designItems = designItemRepo.findAll();
 
-        if (cloths.isEmpty()) {
+        if (designItems.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject.builder()
                             .message("no cloth found")
@@ -91,7 +89,7 @@ public class ClothServiceImpl implements ClothService {
             );
         }
 
-        List<Map<String, Object>> mappedCloths = cloths.stream()
+        List<Map<String, Object>> mappedCloths = designItems.stream()
                 .map(cloth -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("logo_height", cloth.getLogoHeight());

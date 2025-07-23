@@ -27,7 +27,7 @@ public class DesignServiceApplication {
     @Bean
     public CommandLineRunner initData(
             DesignRequestRepo designRequestRepo,
-            ClothRepo clothRepo,
+            DesignItemRepo designItemRepo,
             DesignDeliveryRepo designDeliveryRepo,
             FinalImageRepo finalImageRepo,
             RevisionRequestRepo revisionRequestRepo,
@@ -37,7 +37,7 @@ public class DesignServiceApplication {
             // ======== DESIGN REQUESTS ========
             DesignRequest request1 = DesignRequest.builder()
                     .creationDate(LocalDate.now().minusDays(10))
-                    .isPrivate(true)
+                    .designPrivate(true)
                     .status(Status.CREATED)
                     .schoolId(5)
                     .packageId(null)
@@ -50,7 +50,7 @@ public class DesignServiceApplication {
 
             DesignRequest request2 = DesignRequest.builder()
                     .creationDate(LocalDate.now().minusDays(7))
-                    .isPrivate(false)
+                    .designPrivate(false)
                     .status(Status.PAID)
                     .schoolId(5)
                     .packageId(1)
@@ -63,7 +63,7 @@ public class DesignServiceApplication {
 
             DesignRequest request3 = DesignRequest.builder()
                     .creationDate(LocalDate.now().minusDays(10))
-                    .isPrivate(true)
+                    .designPrivate(true)
                     .status(Status.COMPLETED)
                     .schoolId(5)
                     .packageId(1)
@@ -77,7 +77,7 @@ public class DesignServiceApplication {
             designRequestRepo.saveAll(List.of(request1, request2, request3));
 
             // ======== CLOTHS ========
-            Cloth boyShirt = Cloth.builder()
+            DesignItem boyShirt = DesignItem.builder()
                     .type(ClothType.PANTS)
                     .category(ClothCategory.REGULAR)
                     .color("#1D1C20")
@@ -88,7 +88,7 @@ public class DesignServiceApplication {
                     .designRequest(request1)
                     .build();
 
-            Cloth girlSkirt = Cloth.builder()
+            DesignItem girlSkirt = DesignItem.builder()
                     .type(ClothType.SHIRT)
                     .category(ClothCategory.REGULAR)
                     .color("#1D1C20")
@@ -102,7 +102,7 @@ public class DesignServiceApplication {
                     .designRequest(request1)
                     .build();
 
-            Cloth pePants = Cloth.builder()
+            DesignItem pePants = DesignItem.builder()
                     .type(ClothType.PANTS)
                     .category(ClothCategory.PHYSICAL)
                     .color("Dark gray")
@@ -113,7 +113,7 @@ public class DesignServiceApplication {
                     .designRequest(request2)
                     .build();
 
-            Cloth peShirt = Cloth.builder()
+            DesignItem peShirt = DesignItem.builder()
                     .type(ClothType.SHIRT)
                     .category(ClothCategory.PHYSICAL)
                     .color("White with blue")
@@ -124,7 +124,7 @@ public class DesignServiceApplication {
                     .designRequest(request2)
                     .build();
 
-            Cloth regularBoyShirt = Cloth
+            DesignItem regularBoyShirt = DesignItem
                     .builder()
                     .logoHeight(100)
                     .logoWidth(100)
@@ -140,7 +140,7 @@ public class DesignServiceApplication {
                     .note("Regular boy shirt for primary students")
                     .build();
 
-            Cloth regularBoyPant = Cloth
+            DesignItem regularBoyPant = DesignItem
                     .builder()
                     .designRequest(request3)
                     .category(ClothCategory.REGULAR)
@@ -151,7 +151,7 @@ public class DesignServiceApplication {
                     .note("Regular boy pant for primary students")
                     .build();
 
-            Cloth regularGirlShirt = Cloth
+            DesignItem regularGirlShirt = DesignItem
                     .builder()
                     .logoHeight(100)
                     .logoWidth(100)
@@ -165,7 +165,7 @@ public class DesignServiceApplication {
                     .logoPosition("top-left")
                     .note("Regular girl shirt for primary students")
                     .build();
-            Cloth regularGirlSkirt = Cloth
+            DesignItem regularGirlSkirt = DesignItem
                     .builder()
                     .designRequest(request3)
                     .category(ClothCategory.REGULAR)
@@ -175,7 +175,7 @@ public class DesignServiceApplication {
                     .fabric(Fabric.SILK)
                     .note("Regular girt skirt for primary students")
                     .build();
-            Cloth boyPEShirt = Cloth
+            DesignItem boyPEShirt = DesignItem
                     .builder()
                     .logoHeight(200)
                     .logoWidth(200)
@@ -190,7 +190,7 @@ public class DesignServiceApplication {
                     .logoPosition("back")
                     .note("PE boy shirt for primary students")
                     .build();
-            Cloth boyPEPant = Cloth
+            DesignItem boyPEPant = DesignItem
                     .builder()
                     .designRequest(request3)
                     .category(ClothCategory.PHYSICAL)
@@ -200,7 +200,7 @@ public class DesignServiceApplication {
                     .fabric(Fabric.SILK)
                     .note("PE boy pant for primary students")
                     .build();
-            Cloth girlPEShirt = Cloth
+            DesignItem girlPEShirt = DesignItem
                     .builder()
                     .logoHeight(200)
                     .logoWidth(200)
@@ -215,7 +215,7 @@ public class DesignServiceApplication {
                     .logoPosition("back")
                     .note("PE girl shirt for primary students")
                     .build();
-            Cloth girlPEPant = Cloth
+            DesignItem girlPEPant = DesignItem
                     .builder()
                     .designRequest(request3)
                     .category(ClothCategory.PHYSICAL)
@@ -225,7 +225,7 @@ public class DesignServiceApplication {
                     .fabric(Fabric.SILK)
                     .note("PE girl pant for primary students")
                     .build();
-            clothRepo.saveAll(List.of(
+            designItemRepo.saveAll(List.of(
                     boyShirt, girlSkirt, pePants, peShirt,
                     regularBoyShirt, regularBoyPant, regularGirlShirt, regularGirlSkirt,
                     boyPEShirt, boyPEPant, girlPEShirt, girlPEPant
@@ -237,8 +237,8 @@ public class DesignServiceApplication {
                     .fileUrl("https://cdn.school.com/request1_delivery1.zip")
                     .deliveryNumber(1)
                     .submitDate(LocalDateTime.now().minusDays(8))
-                    .isFinal(true)
-                    .isRevision(true)
+                    .designFinal(true)
+                    .revision(true)
                     .note("Initial delivery for request1")
                     .build();
 
@@ -247,8 +247,8 @@ public class DesignServiceApplication {
                     .fileUrl("https://cdn.school.com/request2_delivery1.zip")
                     .deliveryNumber(1)
                     .submitDate(LocalDateTime.now().minusDays(5))
-                    .isFinal(false)
-                    .isRevision(false)
+                    .designFinal(false)
+                    .revision(false)
                     .note("First version for request2")
                     .build();
             DesignDelivery delivery3 = DesignDelivery.builder()
@@ -256,8 +256,8 @@ public class DesignServiceApplication {
                     .fileUrl("https://cdn.school.com/request2_delivery1.zip")
                     .deliveryNumber(1)
                     .submitDate(LocalDateTime.now().minusDays(5))
-                    .isFinal(true)
-                    .isRevision(true)
+                    .designFinal(true)
+                    .revision(true)
                     .note("First version for request3")
                     .build();
 
@@ -266,13 +266,13 @@ public class DesignServiceApplication {
             // ======== REVISION REQUESTS (attached to delivery) ========
             RevisionRequest rev1 = RevisionRequest.builder()
                     .note("Please add front buttons to shirt design")
-                    .createdAt(LocalDate.now().minusDays(7))
+                    .requestDate(LocalDate.now().minusDays(7))
                     .delivery(delivery1)
                     .build();
 
             RevisionRequest rev2 = RevisionRequest.builder()
                     .note("Logo is too small, make it bigger")
-                    .createdAt(LocalDate.now().minusDays(4))
+                    .requestDate(LocalDate.now().minusDays(4))
                     .delivery(delivery2)
                     .build();
 
@@ -282,65 +282,65 @@ public class DesignServiceApplication {
             FinalImage image1 = FinalImage.builder()
                     .name("Men's shirt front")
                     .imageUrl("https://elementsworld.in/wp-content/uploads/2016/11/school-1.jpg")
-                    .cloth(boyShirt)
+                    .designItem(boyShirt)
                     .build();
 
             FinalImage image2 = FinalImage.builder()
                     .name("Girl skirt final")
                     .imageUrl("https://elementsworld.in/wp-content/uploads/2016/11/school-1.jpg")
-                    .cloth(girlSkirt)
+                    .designItem(girlSkirt)
                     .build();
 
             FinalImage image3 = FinalImage.builder()
                     .name("PE pants")
                     .imageUrl("https://elementsworld.in/wp-content/uploads/2016/11/school-1.jpg")
-                    .cloth(pePants)
+                    .designItem(pePants)
                     .build();
 
             FinalImage image4 = FinalImage.builder()
                     .name("PE shirt")
                     .imageUrl("https://elementsworld.in/wp-content/uploads/2016/11/school-1.jpg")
-                    .cloth(peShirt)
+                    .designItem(peShirt)
                     .build();
             FinalImage imageRegularBoyShirt = FinalImage.builder()
                     .name("Regular boy shirt")
                     .imageUrl("https://cdn.school.com/final_pe_shirt.png")
-                    .cloth(regularBoyShirt)
+                    .designItem(regularBoyShirt)
                     .build();
             FinalImage imageRegularBoyPant = FinalImage.builder()
                     .name("Regular boy pant")
                     .imageUrl("https://cdn.school.com/final_pe_shirt.png")
-                    .cloth(regularBoyPant)
+                    .designItem(regularBoyPant)
                     .build();
             FinalImage imageRegularGirlShirt = FinalImage.builder()
                     .name("Regular girl shirt")
                     .imageUrl("https://cdn.school.com/final_pe_shirt.png")
-                    .cloth(regularGirlShirt)
+                    .designItem(regularGirlShirt)
                     .build();
             FinalImage imageRegularGirlSkirt = FinalImage.builder()
                     .name("Regular girl skirt")
                     .imageUrl("https://cdn.school.com/final_pe_shirt.png")
-                    .cloth(regularGirlSkirt)
+                    .designItem(regularGirlSkirt)
                     .build();
             FinalImage imagePEBoyShirt = FinalImage.builder()
                     .name("PE boy shirt")
                     .imageUrl("https://cdn.school.com/final_pe_shirt.png")
-                    .cloth(boyPEShirt)
+                    .designItem(boyPEShirt)
                     .build();
             FinalImage imagePEBoyPant = FinalImage.builder()
                     .name("PE boy pant")
                     .imageUrl("https://cdn.school.com/final_pe_shirt.png")
-                    .cloth(boyPEPant)
+                    .designItem(boyPEPant)
                     .build();
             FinalImage imagePEGirlShirt = FinalImage.builder()
                     .name("PE girl shirt")
                     .imageUrl("https://cdn.school.com/final_pe_shirt.png")
-                    .cloth(girlPEShirt)
+                    .designItem(girlPEShirt)
                     .build();
             FinalImage imagePEGirlPant = FinalImage.builder()
                     .name("PE girl pant")
                     .imageUrl("https://cdn.school.com/final_pe_shirt.png")
-                    .cloth(girlPEPant)
+                    .designItem(girlPEPant)
                     .build();
 
 
@@ -354,54 +354,54 @@ public class DesignServiceApplication {
 
             SampleImage sample1 = SampleImage.builder()
                     .imageUrl(cloudinarySampleUrl)
-                    .cloth(boyShirt)
+                    .designItem(boyShirt)
                     .build();
 
             SampleImage sample2 = SampleImage.builder()
                     .imageUrl(cloudinarySampleUrl)
-                    .cloth(girlSkirt)
+                    .designItem(girlSkirt)
                     .build();
 
             SampleImage sample3 = SampleImage.builder()
                     .imageUrl(cloudinarySampleUrl)
-                    .cloth(pePants)
+                    .designItem(pePants)
                     .build();
 
             SampleImage sample4 = SampleImage.builder()
                     .imageUrl(cloudinarySampleUrl)
-                    .cloth(regularBoyShirt)
+                    .designItem(regularBoyShirt)
                     .build();
 
             SampleImage sample5 = SampleImage.builder()
                     .imageUrl(cloudinarySampleUrl)
-                    .cloth(regularBoyPant)
+                    .designItem(regularBoyPant)
                     .build();
 
             SampleImage sample6 = SampleImage.builder()
                     .imageUrl(cloudinarySampleUrl)
-                    .cloth(regularGirlShirt)
+                    .designItem(regularGirlShirt)
                     .build();
             SampleImage sample7 = SampleImage.builder()
                     .imageUrl(cloudinarySampleUrl)
-                    .cloth(regularGirlSkirt)
+                    .designItem(regularGirlSkirt)
                     .build();
             SampleImage sample8 = SampleImage.builder()
                     .imageUrl(cloudinarySampleUrl)
-                    .cloth(boyPEShirt)
+                    .designItem(boyPEShirt)
                     .build();
 
             SampleImage sample9 = SampleImage.builder()
                     .imageUrl(cloudinarySampleUrl)
-                    .cloth(boyPEPant)
+                    .designItem(boyPEPant)
                     .build();
 
             SampleImage sample10 = SampleImage.builder()
                     .imageUrl(cloudinarySampleUrl)
-                    .cloth(girlPEShirt)
+                    .designItem(girlPEShirt)
                     .build();
             SampleImage sample11 = SampleImage.builder()
                     .imageUrl(cloudinarySampleUrl)
-                    .cloth(girlPEPant)
+                    .designItem(girlPEPant)
                     .build();
 
 
