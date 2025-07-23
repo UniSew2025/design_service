@@ -11,4 +11,9 @@ import lombok.experimental.FieldDefaults;
 public class PickPackageRequest {
     int designRequestId;
     int packageId;
+    long getPackagePrice;
+    String packageName;
+    String packageHeaderContent;
+    int revisionTime;
+    int packageDeliveryDate;
 }

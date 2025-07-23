@@ -53,6 +53,33 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                     response.put("feedback", request.getFeedbackId());
                     response.put("status", request.getStatus().getValue());
 
+                    List<Cloth> clothList = request.getCloths();
+
+                    List<Map<String, Object>> mapList = clothList.stream().map(
+                            cloth -> {
+                                Map<String, Object> clothMap = new HashMap<>();
+                                clothMap.put("id", cloth.getId());
+                                clothMap.put("type", cloth.getType());
+                                clothMap.put("category", cloth.getCategory());
+                                clothMap.put("note", cloth.getNote());
+                                return clothMap;
+                            }
+                    ).toList();
+                    response.put("clothes", mapList);
+
+                    int revisionCount = 0;
+                    List<DesignDelivery> deliveries = request.getDeliveries();
+
+                    for (DesignDelivery delivery : deliveries) {
+                        if(delivery.getParentRevision() != null) {
+                            List<RevisionRequest> revisionRequests = delivery.getRevisionRequests();
+                            for (RevisionRequest revisionRequest : revisionRequests) {
+                                revisionCount ++;
+                            }
+                        }
+                    }
+                    response.put("revisionCount", revisionCount);
+
                     return response;
                 }
         ).toList();
@@ -174,6 +201,11 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         }
 
         designRequest.setPackageId(request.getPackageId());
+        designRequest.setPackageName(request.getPackageName());
+        designRequest.setRevisionTime(request.getRevisionTime());
+        designRequest.setPackageDeliveryDate(request.getPackageDeliveryDate());
+        designRequest.setPackageHeaderContent(request.getPackageHeaderContent());
+        designRequest.setPackagePrice(request.getGetPackagePrice());
         designRequest.setStatus(Status.PAID);
         designRequestRepo.save(designRequest);
 
@@ -235,15 +267,6 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             );
         }
 
-        boolean existsRevision = revisionRequestRepo.existsByDelivery_Id(delivery.getId());
-        if (existsRevision) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    ResponseObject.builder()
-                            .message("A revision request already exists for this delivery.")
-                            .build()
-            );
-        }
-
         RevisionRequest revisionRequest = RevisionRequest.builder()
                 .delivery(delivery)
                 .note(request.getNote())
@@ -255,7 +278,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                 .designRequest(delivery.getDesignRequest())
                 .senderId(0)
                 .senderRole("system")
-                .content("School requested a revision: " + request.getNote())
+                .content("School requested a revision for delivery " + request.getDeliveryId())
                 .creationDate(LocalDateTime.now())
                 .build();
         designCommentRepo.save(sysComment);
