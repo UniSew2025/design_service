@@ -24,8 +24,8 @@ public class DesignRequest {
     @Column(name = "`creation_date`")
     LocalDate creationDate;
 
-    @Column(name = "`private`")
-    boolean isPrivate;
+    @Column(name = "`is_private`")
+    boolean designPrivate;
 
     @Enumerated(EnumType.STRING)
     Status status;
@@ -54,7 +54,7 @@ public class DesignRequest {
     @OneToMany(mappedBy = "designRequest")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<Cloth> cloths;
+    List<DesignItem> designItems;
 
     @Column(name = "`feedback_id`")
     Integer feedbackId;

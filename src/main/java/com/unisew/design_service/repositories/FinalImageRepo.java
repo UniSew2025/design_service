@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface FinalImageRepo extends JpaRepository<FinalImage, Integer> {
 
-    List<FinalImage> findAllByCloth_Id(Integer id);
+    List<FinalImage> findAllByDesignItem_Id(Integer id);
 }

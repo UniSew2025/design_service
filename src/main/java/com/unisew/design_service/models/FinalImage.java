@@ -34,7 +34,7 @@ public class FinalImage {
     String name;
 
     @ManyToOne
-    @JoinColumn(name = "`cloth_id`")
-    Cloth cloth;
+    @JoinColumn(name = "`item_id`")
+    DesignItem designItem;
 }
 

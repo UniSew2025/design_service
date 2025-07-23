@@ -3,8 +3,6 @@ package com.unisew.design_service.service;
 import com.unisew.design_service.enums.Status;
 import com.unisew.design_service.models.*;
 import com.unisew.design_service.repositories.*;
-import com.unisew.design_service.request.CreateDesignDraftRequest;
-import com.unisew.design_service.request.SetDesignDraftFinalRequest;
 import com.unisew.design_service.request.SubmitDeliveryRequest;
 import com.unisew.design_service.response.ResponseObject;
 import lombok.AccessLevel;
@@ -14,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -23,7 +20,7 @@ import java.util.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DesignDeliveryServiceImpl implements DesignDeliveryService {
 
-    final ClothRepo clothRepo;
+    final DesignItemRepo designItemRepo;
     final DesignRequestRepo designRequestRepo;
     final FinalImageRepo finalImageRepo;
     final DesignCommentRepo designCommentRepo;
@@ -59,8 +56,8 @@ public class DesignDeliveryServiceImpl implements DesignDeliveryService {
                 .deliveryNumber(nextDeliveryNumber)
                 .submitDate(LocalDateTime.now())
                 .parentRevision(revisionRequest)
-                .isFinal(false)
-                .isRevision(request.isRevision())
+                .designFinal(false)
+                .revision(request.isRevision())
                 .note(request.getNote())
                 .build();
         designDeliveryRepo.save(delivery);

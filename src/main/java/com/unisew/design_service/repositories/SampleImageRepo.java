@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface SampleImageRepo extends JpaRepository<SampleImage, Integer> {
-    List<SampleImage> findAllByCloth_Id(Integer clothId);
+    List<SampleImage> findAllByDesignItem_Id(Integer clothId);
 }
