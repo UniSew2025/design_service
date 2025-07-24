@@ -5,6 +5,7 @@ import com.unisew.design_service.models.*;
 import com.unisew.design_service.repositories.*;
 import com.unisew.design_service.request.SubmitDeliveryRequest;
 import com.unisew.design_service.response.ResponseObject;
+import com.unisew.design_service.utils.AccessCurrentLoginUser;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class DesignDeliveryServiceImpl implements DesignDeliveryService {
     final DesignCommentRepo designCommentRepo;
     final DesignDeliveryRepo designDeliveryRepo;
     private final RevisionRequestRepo revisionRequestRepo;
+    final AccountService accountService;
 
 
     @Override
@@ -48,7 +51,10 @@ public class DesignDeliveryServiceImpl implements DesignDeliveryService {
         Optional<DesignDelivery> latestDelivery = designDeliveryRepo.findTopByDesignRequest_IdOrderByDeliveryNumberDesc(request.getRequestId());
         int nextDeliveryNumber = latestDelivery.map(d -> d.getDeliveryNumber() + 1).orElse(1);
 
-        RevisionRequest revisionRequest = revisionRequestRepo.findById(request.getRequestId()).orElse(null);
+        RevisionRequest revisionRequest = null;
+        if (request.isRevision() && request.getRevisionId() != null && request.getRevisionId() != 0) {
+            revisionRequest = revisionRequestRepo.findById(request.getRevisionId()).orElse(null);
+        }
 
         DesignDelivery delivery = DesignDelivery.builder()
                 .designRequest(designRequest)
@@ -84,5 +90,121 @@ public class DesignDeliveryServiceImpl implements DesignDeliveryService {
                         .build()
         );
     }
+
+    @Override
+    public ResponseEntity<ResponseObject> getAllDeliveryByRequestId(int requestId) {
+
+        List<DesignDelivery> list = designDeliveryRepo.findAllByDesignRequest_Id(requestId);
+
+        if (list.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    ResponseObject.builder()
+                            .message("No Design Requests found")
+                            .build()
+            );
+        }
+
+        Integer accountId = AccessCurrentLoginUser.getId();
+
+        String accessToken = null;
+        if (accountId != null) {
+
+            Map<String, Object> tokenResponse = accountService.getGoogleAccessToken(accountId);
+            if (tokenResponse != null && tokenResponse.get("data") != null) {
+
+                Map<String, Object> data = (Map<String, Object>) tokenResponse.get("data");
+                accessToken = (String) data.get("access_token");
+            } else if (tokenResponse != null && tokenResponse.get("access_token") != null) {
+
+                accessToken = (String) tokenResponse.get("access_token");
+            }
+        }
+
+        List<Map<String, Object>> listMap = list.stream().map(
+                designDelivery -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", designDelivery.getId());
+                    map.put("submitDate", designDelivery.getSubmitDate());
+                    map.put("fileUrl", designDelivery.getFileUrl());
+                    map.put("note", designDelivery.getNote());
+                    map.put("deliveryNumber", designDelivery.getDeliveryNumber());
+                    map.put("isFinal", designDelivery.isDesignFinal());
+                    map.put("isRevision", designDelivery.isRevision());
+
+                    List<RevisionRequest> revisionRequestList = designDelivery.getRevisionRequests();
+                    if(revisionRequestList != null && !revisionRequestList.isEmpty()){
+                        List<Map<String, Object>> revisionMap = revisionRequestList.stream().map(
+                                revisionRequest -> {
+                                    Map<String, Object> revision = new HashMap<>();
+                                    revision.put("id", revisionRequest.getId());
+                                    revision.put("deliveryId", revisionRequest.getDelivery().getId());
+                                    revision.put("createAt", revisionRequest.getRequestDate());
+                                    revision.put("note", revisionRequest.getNote());
+                                    return revision;
+                                }
+                        ).toList();
+                        map.put("revision", revisionMap);
+                    }
+                    return map;
+                }
+        ).toList();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("deliveries", listMap);
+        data.put("google_access_token", accessToken);
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseObject.builder()
+                        .message("List Design delivery successfully")
+                        .data(data)
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> getAllUnUsedRevisionRequest(int requestId) {
+
+        List<DesignDelivery> designDeliveryList = designDeliveryRepo.findAllByDesignRequest_Id(requestId);
+
+        List<RevisionRequest> revisionRequestList = revisionRequestRepo.findAllByDelivery_DesignRequest_Id(requestId);
+
+        if (revisionRequestList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    ResponseObject.builder()
+                            .message("No revision request for this request")
+                            .build()
+            );
+        }
+
+        Set<Integer> usedRevisionIds = designDeliveryList.stream()
+                .map(DesignDelivery::getParentRevision)
+                .filter(Objects::nonNull)
+                .map(RevisionRequest::getId)
+                .collect(Collectors.toSet());
+
+        List<RevisionRequest> unusedRevisionRequests = revisionRequestList.stream()
+                .filter(rev -> !usedRevisionIds.contains(rev.getId()))
+                .toList();
+
+        List<Map<String,Object>> mapList = unusedRevisionRequests.stream()
+                .map(
+                        revisionRequest -> {
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("id", revisionRequest.getId());
+                            map.put("deliveryId", revisionRequest.getDelivery().getId());
+                            map.put("requestDate", revisionRequest.getRequestDate());
+                            map.put("note", revisionRequest.getNote());
+                            return map;
+                        }
+                ).toList();
+
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .message("List revision request not completed")
+                        .data(mapList)
+                        .build()
+        );
+    }
+
 
 }

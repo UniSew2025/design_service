@@ -8,4 +8,6 @@ import org.springframework.http.ResponseEntity;
 
 public interface DesignDeliveryService {
     ResponseEntity<ResponseObject> submitDelivery(SubmitDeliveryRequest request);
+    ResponseEntity<ResponseObject> getAllDeliveryByRequestId(int requestId);
+    ResponseEntity<ResponseObject> getAllUnUsedRevisionRequest(int requestId);
 }

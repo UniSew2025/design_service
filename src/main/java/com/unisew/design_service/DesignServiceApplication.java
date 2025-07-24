@@ -44,6 +44,7 @@ public class DesignServiceApplication {
                     .packageName(null)
                     .packagePrice(0)
                     .packageDeliveryDate(0)
+                    .packageHeaderContent("Design 1 logo, 1 uniform mockup, 2 revisions")
                     .revisionTime(0)
                     .feedbackId(null)
                     .build();
@@ -57,6 +58,7 @@ public class DesignServiceApplication {
                     .packageName("Basic Design")
                     .packagePrice(1000000)
                     .packageDeliveryDate(5)
+                    .packageHeaderContent("Design 1 logo, 1 uniform mockup, 2 revisions")
                     .revisionTime(2)
                     .feedbackId(0)
                     .build();
@@ -69,6 +71,7 @@ public class DesignServiceApplication {
                     .packageId(1)
                     .packageName("Basic Design")
                     .packagePrice(1000000)
+                    .packageHeaderContent("Design 1 logo, 1 uniform mockup, 2 revisions")
                     .packageDeliveryDate(5)
                     .revisionTime(2)
                     .feedbackId(0)
