@@ -10,6 +10,7 @@ import com.unisew.design_service.utils.AccessCurrentLoginUser;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.type.descriptor.java.ObjectJavaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     final DesignCommentRepo designCommentRepo;
     final FinalImageRepo finalImageRepo;
     final ProfileService profileService;
-    final AccountService accountService;
+
 
     @Override
     public ResponseEntity<ResponseObject> getAllDesignRequests() {
@@ -51,6 +52,25 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                     response.put("creationDate",request.getCreationDate());
                     response.put("feedback", request.getFeedbackId());
                     response.put("status", request.getStatus().getValue());
+
+                    List<DesignItem> itemList = request.getDesignItems();
+
+                    List<Map<String, Object>> mapList = itemList.stream().map(
+                            item -> {
+                                Map<String, Object> clothMap = new HashMap<>();
+                                clothMap.put("id", item.getId());
+                                clothMap.put("type", item.getType());
+                                clothMap.put("category", item.getCategory());
+                                clothMap.put("note", item.getNote());
+                                return clothMap;
+                            }
+                    ).toList();
+                    response.put("clothes", mapList);
+
+                    int revisionCount = (int) request.getDeliveries().stream()
+                            .filter(DesignDelivery::isRevision)
+                            .count();
+                    response.put("revisionCount", revisionCount);
 
                     return response;
                 }
@@ -74,30 +94,61 @@ public class DesignRequestServiceImpl implements DesignRequestService {
     }
 
     @Override
-    public ResponseEntity<ResponseObject> getDesignRequestById(GetDesignRequestById request) {
+    public ResponseEntity<ResponseObject> getDesignRequestById(int id) {
 
-        DesignRequest designRequest = designRequestRepo.findById(request.getDesignId()).orElse(null);
+        List<DesignRequest> designRequests = designRequestRepo.findAll();
 
-        if (designRequest == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        Map<String, Object> requestMap = designRequests.stream()
+                .filter(d -> d.getId() == id)
+                .findFirst()
+                .map(designRequest -> {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("id", designRequest.getId());
+                    response.put("school", designRequest.getSchoolId());
+                    response.put("private", designRequest.isDesignPrivate());
+                    response.put("package", designRequest.getPackageId());
+                    response.put("packageName", designRequest.getPackageName());
+                    response.put("packagePrice", designRequest.getPackagePrice());
+                    response.put("headerContent", designRequest.getPackageHeaderContent());
+                    response.put("revisionTime", designRequest.getRevisionTime());
+                    response.put("deliveryDate", designRequest.getPackageDeliveryDate());
+                    response.put("creationDate", designRequest.getCreationDate());
+                    response.put("feedback", designRequest.getFeedbackId());
+                    response.put("status", designRequest.getStatus().getValue());
+
+                    List<Map<String, Object>> mapList = designRequest.getDesignItems().stream().map(item -> {
+                        Map<String, Object> clothMap = new HashMap<>();
+                        clothMap.put("id", item.getId());
+                        clothMap.put("type", item.getType());
+                        clothMap.put("category", item.getCategory());
+                        clothMap.put("note", item.getNote());
+                        return clothMap;
+                    }).toList();
+
+                    response.put("clothes", mapList);
+
+                    int revisionCount = (int) designRequest.getDeliveries().stream()
+                            .filter(DesignDelivery::isRevision)
+                            .count();
+                    response.put("revisionCount", revisionCount);
+
+                    return response;
+                })
+                .orElse(null);
+
+
+        if (requestMap == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     ResponseObject.builder()
-                            .message("Can not find Design Request with " + request.getDesignId())
+                            .message("Design Request with ID " + id + " not found.")
                             .build()
             );
         }
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", designRequest.getId());
-        map.put("school", designRequest.getSchoolId());
-        map.put("private", designRequest.isDesignPrivate());
-        map.put("feedback", designRequest.getFeedbackId());
-        map.put("status", designRequest.getStatus());
-
-
         return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseObject.builder()
-                        .message("Get Design Request successfully")
-                        .data(map)
+                        .message("Get Design Request by ID")
+                        .data(requestMap)
                         .build()
         );
     }
@@ -173,6 +224,11 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         }
 
         designRequest.setPackageId(request.getPackageId());
+        designRequest.setPackageName(request.getPackageName());
+        designRequest.setRevisionTime(request.getRevisionTime());
+        designRequest.setPackageDeliveryDate(request.getPackageDeliveryDate());
+        designRequest.setPackageHeaderContent(request.getPackageHeaderContent());
+        designRequest.setPackagePrice(request.getGetPackagePrice());
         designRequest.setStatus(Status.PAID);
         designRequestRepo.save(designRequest);
 
@@ -234,15 +290,6 @@ public class DesignRequestServiceImpl implements DesignRequestService {
             );
         }
 
-        boolean existsRevision = revisionRequestRepo.existsByDelivery_Id(delivery.getId());
-        if (existsRevision) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    ResponseObject.builder()
-                            .message("A revision request already exists for this delivery.")
-                            .build()
-            );
-        }
-
         RevisionRequest revisionRequest = RevisionRequest.builder()
                 .delivery(delivery)
                 .note(request.getNote())
@@ -254,7 +301,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                 .designRequest(delivery.getDesignRequest())
                 .senderId(0)
                 .senderRole("system")
-                .content("School requested a revision: " + request.getNote())
+                .content("School requested a revision for delivery " + request.getDeliveryId())
                 .creationDate(LocalDateTime.now())
                 .build();
         designCommentRepo.save(sysComment);
@@ -462,75 +509,7 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         );
     }
 
-    @Override
-    public ResponseEntity<ResponseObject> getAllDeliveryByRequestId(int requestId) {
 
-        List<DesignDelivery> list = designDeliveryRepo.findAllByDesignRequest_Id(requestId);
-
-        if (list.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    ResponseObject.builder()
-                            .message("No Design Requests found")
-                            .build()
-            );
-        }
-
-        Integer accountId = AccessCurrentLoginUser.getId();
-
-        String accessToken = null;
-        if (accountId != null) {
-
-            Map<String, Object> tokenResponse = accountService.getGoogleAccessToken(accountId);
-            if (tokenResponse != null && tokenResponse.get("data") != null) {
-
-                Map<String, Object> data = (Map<String, Object>) tokenResponse.get("data");
-                accessToken = (String) data.get("access_token");
-            } else if (tokenResponse != null && tokenResponse.get("access_token") != null) {
-
-                accessToken = (String) tokenResponse.get("access_token");
-            }
-        }
-
-        List<Map<String, Object>> listMap = list.stream().map(
-                designDelivery -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("id", designDelivery.getId());
-                    map.put("submitDate", designDelivery.getSubmitDate());
-                    map.put("fileUrl", designDelivery.getFileUrl());
-                    map.put("note", designDelivery.getNote());
-                    map.put("deliveryNumber", designDelivery.getDeliveryNumber());
-                    map.put("isFinal", designDelivery.isDesignFinal());
-                    map.put("isRevision", designDelivery.isRevision());
-
-                    List<RevisionRequest> revisionRequestList = designDelivery.getRevisionRequests();
-                    if(revisionRequestList != null && !revisionRequestList.isEmpty()){
-                       List<Map<String, Object>> revisionMap = revisionRequestList.stream().map(
-                               revisionRequest -> {
-                                   Map<String, Object> revision = new HashMap<>();
-                                   revision.put("id", revisionRequest.getId());
-                                   revision.put("deliveryId", revisionRequest.getDelivery().getId());
-                                   revision.put("createAt", revisionRequest.getRequestDate());
-                                   revision.put("note", revisionRequest.getNote());
-                                   return revision;
-                               }
-                       ).toList();
-                       map.put("revision", revisionMap);
-                    }
-                    return map;
-                }
-        ).toList();
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("deliveries", listMap);
-        data.put("google_access_token", accessToken);
-
-        return ResponseEntity.status(HttpStatus.OK).body(
-                ResponseObject.builder()
-                        .message("List Design delivery successfully")
-                        .data(data)
-                        .build()
-        );
-    }
 
     private void createSampleImageByCloth(DesignItem designItem, List<CreateDesignRequest.Image> images) {
         for (CreateDesignRequest.Image image : images) {

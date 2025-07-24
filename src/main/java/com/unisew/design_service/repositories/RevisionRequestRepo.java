@@ -8,5 +8,5 @@ import java.util.List;
 public interface RevisionRequestRepo extends JpaRepository<RevisionRequest, Integer> {
     boolean existsByDelivery_Id(Integer id);
 
-    List<RevisionRequest> findAllById(Integer id);
+    List<RevisionRequest> findAllByDelivery_DesignRequest_Id(Integer deliveryDesignRequestId);
 }
