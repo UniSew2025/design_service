@@ -18,4 +18,6 @@ public interface DesignRequestService {
     ResponseEntity<ResponseObject> sendComment(SendCommentRequest request);
     ResponseEntity<ResponseObject> getAllDesignByPackageId(GetAllDesignByPackageIdRequest request);
     ResponseEntity<ResponseObject> getAllDeliveryByRequestId(int requestId);
+
+    boolean isSafeToBan(List<Integer> packageIds);
 }

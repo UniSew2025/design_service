@@ -532,7 +532,6 @@ public class DesignRequestServiceImpl implements DesignRequestService {
         );
     }
 
-
     private void createSampleImageByCloth(DesignItem designItem, List<CreateDesignRequest.Image> images) {
         for (CreateDesignRequest.Image image : images) {
             sampleImageRepo.save(
@@ -542,4 +541,17 @@ public class DesignRequestServiceImpl implements DesignRequestService {
                             .build());
         }
     }
+
+    //-----------------------------Internal Method-----------------------------
+    @Override
+    public boolean isSafeToBan(List<Integer> packageIds) {
+        List<DesignRequest> list = designRequestRepo.findAllByPackageIdIn(packageIds);
+        for (DesignRequest designRequest : list) {
+            if (designRequest.getStatus() != Status.COMPLETED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
