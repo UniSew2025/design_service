@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface DesignRequestService {
     ResponseEntity<ResponseObject> getAllDesignRequests();
-    ResponseEntity<ResponseObject> getDesignRequestById(GetDesignRequestById request);
+    ResponseEntity<ResponseObject> getDesignRequestById(int id);
     ResponseEntity<ResponseObject> createDesignRequest(CreateDesignRequest request);
     ResponseEntity<ResponseObject> pickPackage(PickPackageRequest request);
     ResponseEntity<ResponseObject> makeDesignPublic(MakeDesignPublicRequest request);
@@ -17,5 +17,5 @@ public interface DesignRequestService {
     ResponseEntity<ResponseObject> getListDesignComplete();
     ResponseEntity<ResponseObject> sendComment(SendCommentRequest request);
     ResponseEntity<ResponseObject> getAllDesignByPackageId(GetAllDesignByPackageIdRequest request);
-    ResponseEntity<ResponseObject> getAllDeliveryByRequestId(int requestId);
+
 }

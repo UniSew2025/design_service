@@ -34,6 +34,7 @@ public class RevisionRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(length = 100000)
     String note;
 
     @Column(name = "`request_date")

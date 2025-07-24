@@ -36,10 +36,10 @@ public class DesignRequestController {
         return designRequestService.createDesignRequest(request);
     }
 
-    @PostMapping("/request")
+    @PostMapping("/request/{id}")
     @PreAuthorize("hasRole('SCHOOL') or hasRole('DESIGNER')")
-    public ResponseEntity<ResponseObject> getRequestById(@RequestBody GetDesignRequestById request) {
-        return designRequestService.getDesignRequestById(request);
+    public ResponseEntity<ResponseObject> getRequestById(@PathVariable int id) {
+        return designRequestService.getDesignRequestById(id);
     }
 
     @PostMapping("/package")
@@ -103,7 +103,12 @@ public class DesignRequestController {
     @GetMapping("/list-delivery/{id}")
     @PreAuthorize("hasRole('SCHOOL') or hasRole('DESIGNER')")
     public ResponseEntity<ResponseObject> getAllDeliveryByRequestId(@PathVariable("id") int id) {
-        return designRequestService.getAllDeliveryByRequestId(id);
+        return designDeliveryService.getAllDeliveryByRequestId(id);
     }
 
+    @GetMapping("/list-revision/{id}")
+    @PreAuthorize("hasRole('SCHOOL') or hasRole('DESIGNER')")
+    public ResponseEntity<ResponseObject> getAllUnUsedRevisionRequest(@PathVariable("id") int id) {
+        return designDeliveryService.getAllUnUsedRevisionRequest(id);
+    }
 }
