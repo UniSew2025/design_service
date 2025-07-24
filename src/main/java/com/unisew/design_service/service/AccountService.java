@@ -18,4 +18,5 @@ public interface AccountService {
 
     @GetMapping("/google-access-token/{accountId}")
     Map<String, Object> getGoogleAccessToken(@PathVariable("accountId") int accountId);
+
 }

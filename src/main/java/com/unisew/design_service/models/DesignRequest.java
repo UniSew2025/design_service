@@ -64,7 +64,6 @@ public class DesignRequest {
     @EqualsAndHashCode.Exclude
     List<DesignComment> comments;
 
-
     @OneToMany(mappedBy = "designRequest")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
