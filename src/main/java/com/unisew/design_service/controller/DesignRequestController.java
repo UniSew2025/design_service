@@ -6,6 +6,8 @@ import com.unisew.design_service.service.ClothService;
 import com.unisew.design_service.service.DesignDeliveryService;
 import com.unisew.design_service.service.DesignRequestService;
 import com.unisew.design_service.service.SampleImageService;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -130,5 +132,11 @@ public class DesignRequestController {
     @PreAuthorize("hasRole('SCHOOL') or hasRole('DESIGNER')")
     public ResponseEntity<ResponseObject> getAllFinalImages(@PathVariable int id) {
         return designDeliveryService.getAllFinalImagesByRequestId(id);
+    }
+
+    @GetMapping("/payment")
+    @PreAuthorize("hasRole('SCHOOL')")
+    public ResponseEntity<ResponseObject> getPaymentUrl(@RequestParam String orderInfo, @RequestParam long amount, HttpServletRequest request) {
+        return designDeliveryService.getPaymentUrl(orderInfo, amount, request);
     }
 }
