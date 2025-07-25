@@ -7,6 +7,8 @@ import com.unisew.design_service.request.AddFinalImagesRequest;
 import com.unisew.design_service.request.SubmitDeliveryRequest;
 import com.unisew.design_service.response.ResponseObject;
 import com.unisew.design_service.utils.AccessCurrentLoginUser;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -15,6 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -342,6 +347,43 @@ public class DesignDeliveryServiceImpl implements DesignDeliveryService {
                         .data(mapList)
                         .build()
         );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> getPaymentUrl(String orderInfo, long amount, HttpServletRequest request) {
+
+        String baseUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+
+        String version = "2.1.1";
+
+        String comment = "pay";
+
+        String currency = "VND";
+
+        String local = "vn";
+
+        String orderType = "topup";
+
+        String tmpCode = "5TXKG00O";
+
+        ZoneId vietnamZone = ZoneId.of("Asia/Ho_Chi_Minh");
+        ZonedDateTime now = ZonedDateTime.now(vietnamZone);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String vnpCreateDate = now.format(formatter);
+
+        ZonedDateTime expireDate = now.plusMinutes(15);
+        String vnpExpireDate = expireDate.format(formatter);
+        String ipAddress = request.getRemoteAddr();
+
+
+        String xForwardedForHeader = request.getHeader("X-FORWARDED-FOR");
+        if (xForwardedForHeader != null && !xForwardedForHeader.isEmpty()) {
+
+            ipAddress = xForwardedForHeader.split(",")[0].trim();
+        }
+        return null;
+
+
     }
 
 
