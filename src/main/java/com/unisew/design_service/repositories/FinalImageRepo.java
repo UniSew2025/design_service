@@ -8,4 +8,6 @@ import java.util.List;
 public interface FinalImageRepo extends JpaRepository<FinalImage, Integer> {
 
     List<FinalImage> findAllByDesignItem_Id(Integer id);
+
+    List<FinalImage> findAllByDesignItem_DesignRequest_Id(Integer designItemDesignRequestId);
 }

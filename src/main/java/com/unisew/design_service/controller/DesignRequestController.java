@@ -113,4 +113,22 @@ public class DesignRequestController {
     public ResponseEntity<ResponseObject> getAllUnUsedRevisionRequest(@PathVariable("id") int id) {
         return designDeliveryService.getAllUnUsedRevisionRequest(id);
     }
+
+    @PostMapping("/makeFinal/{deliveryId}/{requestId}")
+    @PreAuthorize("hasRole('SCHOOL') or hasRole('DESIGNER')")
+    public ResponseEntity<ResponseObject> makeFinal(@PathVariable int deliveryId, @PathVariable int requestId) {
+        return designDeliveryService.makeDeliveryFinalAndRequestComplete(deliveryId, requestId);
+    }
+
+    @PostMapping("/final-image")
+    @PreAuthorize("hasRole('DESIGNER')")
+    public ResponseEntity<ResponseObject> AddFinalImages(@RequestBody AddFinalImagesRequest request) {
+        return designDeliveryService.AddFinalImages(request);
+    }
+
+    @GetMapping("/list/final-image/{id}")
+    @PreAuthorize("hasRole('SCHOOL') or hasRole('DESIGNER')")
+    public ResponseEntity<ResponseObject> getAllFinalImages(@PathVariable int id) {
+        return designDeliveryService.getAllFinalImagesByRequestId(id);
+    }
 }
