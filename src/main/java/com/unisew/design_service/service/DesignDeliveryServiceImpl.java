@@ -3,6 +3,7 @@ package com.unisew.design_service.service;
 import com.unisew.design_service.enums.Status;
 import com.unisew.design_service.models.*;
 import com.unisew.design_service.repositories.*;
+import com.unisew.design_service.request.AddFinalImagesRequest;
 import com.unisew.design_service.request.SubmitDeliveryRequest;
 import com.unisew.design_service.response.ResponseObject;
 import com.unisew.design_service.utils.AccessCurrentLoginUser;
@@ -93,29 +94,17 @@ public class DesignDeliveryServiceImpl implements DesignDeliveryService {
 
     @Override
     public ResponseEntity<ResponseObject> getAllDeliveryByRequestId(int requestId) {
-
         List<DesignDelivery> list = designDeliveryRepo.findAllByDesignRequest_Id(requestId);
-
-        if (list.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    ResponseObject.builder()
-                            .message("No Design Requests found")
-                            .build()
-            );
-        }
 
         Integer accountId = AccessCurrentLoginUser.getId();
 
         String accessToken = null;
         if (accountId != null) {
-
             Map<String, Object> tokenResponse = accountService.getGoogleAccessToken(accountId);
             if (tokenResponse != null && tokenResponse.get("data") != null) {
-
                 Map<String, Object> data = (Map<String, Object>) tokenResponse.get("data");
                 accessToken = (String) data.get("access_token");
             } else if (tokenResponse != null && tokenResponse.get("access_token") != null) {
-
                 accessToken = (String) tokenResponse.get("access_token");
             }
         }
@@ -201,6 +190,155 @@ public class DesignDeliveryServiceImpl implements DesignDeliveryService {
         return ResponseEntity.ok(
                 ResponseObject.builder()
                         .message("List revision request not completed")
+                        .data(mapList)
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> makeDeliveryFinalAndRequestComplete(int deliveryId, int requestId) {
+
+        DesignDelivery designDelivery = designDeliveryRepo.findById(deliveryId).orElse(null);
+
+        DesignRequest designRequest = designRequestRepo.findById(requestId).orElse(null);
+
+        if(designDelivery == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    ResponseObject.builder()
+                            .message("No design delivery found")
+                            .build()
+            );
+        }
+        if(designRequest == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    ResponseObject.builder()
+                            .message("No design requests found")
+                            .build()
+            );
+        }
+
+        if(designDelivery.isDesignFinal()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("Design delivery already final")
+                            .build()
+            );
+        }
+
+        designDelivery.setDesignFinal(true);
+
+
+        designDeliveryRepo.save(designDelivery);
+
+
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseObject.builder()
+                        .message("Make final successfully")
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> AddFinalImages(AddFinalImagesRequest request) {
+
+        DesignRequest designRequest = designRequestRepo.findById(request.getRequestId()).orElse(null);
+
+        List<DesignItem> designItems = designItemRepo.getAllByDesignRequest_Id(request.getRequestId());
+
+        if (designRequest == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    ResponseObject.builder()
+                            .message("Cannot find design request")
+                            .build()
+            );
+        }
+
+        if (designItems.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    ResponseObject.builder()
+                            .message("No design items found for this request")
+                            .build()
+            );
+        }
+
+        List<DesignDelivery> deliveries = designRequest.getDeliveries();
+        if(deliveries.stream().noneMatch(DesignDelivery::isDesignFinal)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    ResponseObject.builder()
+                            .message("No delivery final to add finalImage")
+                            .build()
+            );
+        }
+
+        Map<Integer, DesignItem> designItemMap = designItems.stream()
+                .collect(Collectors.toMap(DesignItem::getId, d -> d));
+
+        List<FinalImage> imagesToSave = new ArrayList<>();
+        List<String> failedImages = new ArrayList<>();
+
+        for (AddFinalImagesRequest.Image imageRequest : request.getImages()) {
+            DesignItem item = designItemMap.get(imageRequest.getDesignItemId());
+            if (item != null) {
+                FinalImage image = FinalImage.builder()
+                        .designItem(item)
+                        .name(imageRequest.getImageName())
+                        .imageUrl(imageRequest.getImageUrl())
+                        .build();
+                imagesToSave.add(image);
+            } else {
+                failedImages.add(String.valueOf(imageRequest.getDesignItemId()));
+            }
+        }
+
+        if (!imagesToSave.isEmpty()) {
+            finalImageRepo.saveAll(imagesToSave);
+            designRequest.setStatus(Status.COMPLETED);
+            designRequestRepo.save(designRequest);
+        }
+
+        String message;
+        if (failedImages.isEmpty()) {
+            message = "All images saved successfully.";
+        } else if (!imagesToSave.isEmpty()) {
+            message = "Some images saved, but not found design items: " + String.join(", ", failedImages);
+        } else {
+            message = "No images saved, design item IDs not found: " + String.join(", ", failedImages);
+        }
+
+        return ResponseEntity.ok(
+                ResponseObject.builder()
+                        .message(message)
+                        .build()
+        );
+    }
+
+    @Override
+    public ResponseEntity<ResponseObject> getAllFinalImagesByRequestId(int requestId) {
+
+        List<FinalImage> finalImageList = finalImageRepo.findAllByDesignItem_DesignRequest_Id(requestId);
+
+        if (finalImageList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    ResponseObject.builder()
+                            .message("Cannot find any image for this request")
+                            .build()
+            );
+        }
+
+        List<Map<String, Object>> mapList = finalImageList.stream().map(
+                finalImage -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", finalImage.getId());
+                    map.put("designItemId", finalImage.getDesignItem().getId());
+                    map.put("imageName", finalImage.getName());
+                    map.put("imageUrl", finalImage.getImageUrl());
+                    return map;
+                }
+        ).toList();
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseObject.builder()
+                        .message("List final Image ")
                         .data(mapList)
                         .build()
         );
